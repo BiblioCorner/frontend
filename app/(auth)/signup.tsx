@@ -11,7 +11,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { ArrowLeft, Eye, EyeOff, Mail, Lock, Smartphone } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Smartphone,
+} from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
@@ -47,16 +54,13 @@ export default function SignupScreen() {
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <ArrowLeft size={24} color={Colors.primary[500]} />
       </TouchableOpacity>
 
       <View style={styles.logoContainer}>
         <Image
-          source={{ uri: 'https://i.ibb.co/zmCpYCK/biblio-corner-logo.png' }}
+          source={require('../../assets/images/icon.psd')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -66,7 +70,11 @@ export default function SignupScreen() {
 
       <View style={styles.inputContainer}>
         <View style={styles.inputWrapper}>
-          <Mail size={20} color={Colors.primary[300]} style={styles.inputIcon} />
+          <Mail
+            size={20}
+            color={Colors.primary[300]}
+            style={styles.inputIcon}
+          />
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -79,7 +87,11 @@ export default function SignupScreen() {
         </View>
 
         <View style={styles.inputWrapper}>
-          <Lock size={20} color={Colors.primary[300]} style={styles.inputIcon} />
+          <Lock
+            size={20}
+            color={Colors.primary[300]}
+            style={styles.inputIcon}
+          />
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -102,7 +114,11 @@ export default function SignupScreen() {
         </View>
 
         <View style={styles.inputWrapper}>
-          <Smartphone size={20} color={Colors.primary[300]} style={styles.inputIcon} />
+          <Smartphone
+            size={20}
+            color={Colors.primary[300]}
+            style={styles.inputIcon}
+          />
           <TextInput
             style={styles.input}
             placeholder="phone number"
@@ -117,7 +133,8 @@ export default function SignupScreen() {
       <TouchableOpacity
         style={[
           styles.signupButton,
-          (isLoading || !email || !password || !phoneNumber) && styles.signupButtonDisabled,
+          (isLoading || !email || !password || !phoneNumber) &&
+            styles.signupButtonDisabled,
         ]}
         onPress={handleSignup}
         disabled={isLoading || !email || !password || !phoneNumber}

@@ -41,16 +41,13 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <ArrowLeft size={24} color={Colors.primary[500]} />
       </TouchableOpacity>
 
       <View style={styles.logoContainer}>
         <Image
-          source={{ uri: 'https://i.ibb.co/zmCpYCK/biblio-corner-logo.png' }}
+          source={require('../../assets/images/icon.psd')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -60,7 +57,11 @@ export default function LoginScreen() {
 
       <View style={styles.inputContainer}>
         <View style={styles.inputWrapper}>
-          <Mail size={20} color={Colors.primary[300]} style={styles.inputIcon} />
+          <Mail
+            size={20}
+            color={Colors.primary[300]}
+            style={styles.inputIcon}
+          />
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -73,7 +74,11 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.inputWrapper}>
-          <Lock size={20} color={Colors.primary[300]} style={styles.inputIcon} />
+          <Lock
+            size={20}
+            color={Colors.primary[300]}
+            style={styles.inputIcon}
+          />
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -103,7 +108,10 @@ export default function LoginScreen() {
       </View>
 
       <TouchableOpacity
-        style={[styles.loginButton, (isLoading || !email || !password) && styles.loginButtonDisabled]}
+        style={[
+          styles.loginButton,
+          (isLoading || !email || !password) && styles.loginButtonDisabled,
+        ]}
         onPress={handleLogin}
         disabled={isLoading || !email || !password}
       >

@@ -10,7 +10,7 @@ export default function WelcomeScreen() {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={{ uri: 'https://i.ibb.co/zmCpYCK/biblio-corner-logo.png' }}
+          source={require('../assets/images/icon.psd')}
           style={styles.logo}
           resizeMode="contain"
         />
