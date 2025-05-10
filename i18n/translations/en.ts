@@ -39,16 +39,19 @@ export default {
     "events": "Events",
     "profile": "Profile"
   },
-  
-  // Home screen
+    // Home screen
   "home": {
     "greeting": "Hello",
     "popularLibraries": "Popular Libraries",
     "upcomingEvents": "Upcoming Events",
     "seeAll": "See All",
-    "search": "Search libraries, events..."
+    "search": "Search libraries, events...",
+    "title": "Libraries",
+    "subtitle": "Find your perfect reading spot",
+    "searchPlaceholder": "Search by name or location...",
+    "noLibraries": "No libraries found",
+    "adjustSearch": "Try adjusting your search"
   },
-  
   // Library
   "library": {
     "about": "About",
@@ -61,11 +64,20 @@ export default {
     "save": "Save Library",
     "unsave": "Unsave Library",
     "closed": "Closed",
-    "writeReview": "Write a Review"
-  },
-  
-  // Events
+    "writeReview": "Write a Review",
+    "notFound": "Library not found",
+    "removedFromBookmarks": "Removed from Bookmarks",
+    "addedToBookmarks": "Added to Bookmarks",
+    "removedFromBookmarksMessage": "{{name}} has been removed from your bookmarks",
+    "addedToBookmarksMessage": "{{name}} has been added to your bookmarks",
+    "info": "Info"
+  },  // Events
   "events": {
+    "title": "Events",
+    "subtitle": "Discover cultural happenings",
+    "searchPlaceholder": "Search events...",
+    "adjustFilters": "Try adjusting your filters",
+    "open": "Open",
     "upcoming": "Upcoming Events",
     "past": "Past Events",
     "today": "Today",
@@ -76,7 +88,19 @@ export default {
     "from": "From",
     "to": "to",
     "location": "Location",
-    "organizer": "Organizer"
+    "organizer": "Organizer",
+    "notFound": "Event not found",
+    "eventFull": "This event is already full",
+    "leftEvent": "Left Event",
+    "joinedEvent": "Joined Event",
+    "leftEventMessage": "You have left {{title}}",
+    "joinedEventMessage": "You have successfully joined {{title}}",
+    "hostedBy": "Hosted by",
+    "attendees": "attendees",
+    "aboutThisEvent": "About this event",
+    "leaveEvent": "Leave Event",
+    "joinEvent": "Join Event",
+    "viewLibrary": "View Library"
   },
   
   // Profile
@@ -100,10 +124,9 @@ export default {
     "about": "About",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service"
-  },
-  
-  // Common
+  },  // Common
   "common": {
+    "all": "All",
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
@@ -116,6 +139,16 @@ export default {
     "success": "Success",
     "back": "Back",
     "next": "Next",
-    "logout": "Sign Out"
+    "logout": "Sign Out",
+    "sorry": "Sorry"
+  },
+  
+  // Error pages
+  "error": {
+    "notFound": {
+      "title": "Oops!",
+      "message": "This screen doesn't exist.",
+      "goHome": "Go to home screen!"
+    }
   }
 };

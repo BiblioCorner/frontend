@@ -25,8 +25,10 @@ import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
 import { events } from '@/data/events';
 import { libraries } from '@/data/libraries';
+import { useTranslation } from 'react-i18next';
 
 export default function EventDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const event = events.find(evt => evt.id === id);
   const library = event ? libraries.find(lib => lib.id === event.libraryId) : null;
@@ -36,9 +38,9 @@ export default function EventDetailScreen() {
   if (!event || !library) {
     return (
       <SafeAreaView style={styles.errorContainer}>
-        <Text style={styles.errorText}>Event not found</Text>
+        <Text style={styles.errorText}>{t('events.notFound', 'Event not found')}</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text style={styles.backButtonText}>{t('common.back')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -46,14 +48,16 @@ export default function EventDetailScreen() {
 
   const handleJoinEvent = () => {
     if (event.status === 'Full') {
-      Alert.alert('Sorry', 'This event is already full');
+      Alert.alert(t('common.sorry', 'Sorry'), t('events.eventFull', 'This event is already full'));
       return;
     }
     
     setIsJoined(!isJoined);
     Alert.alert(
-      isJoined ? 'Left Event' : 'Joined Event',
-      isJoined ? `You have left ${event.title}` : `You have successfully joined ${event.title}`
+      isJoined ? t('events.leftEvent', 'Left Event') : t('events.joinedEvent', 'Joined Event'),
+      isJoined 
+        ? t('events.leftEventMessage', 'You have left {{title}}', { title: event.title }) 
+        : t('events.joinedEventMessage', 'You have successfully joined {{title}}', { title: event.title })
     );
   };
 
@@ -146,7 +150,7 @@ export default function EventDetailScreen() {
             style={styles.libraryContainer}
             onPress={handleViewLibrary}
           >
-            <Text style={styles.libraryLabel}>Hosted by</Text>
+            <Text style={styles.libraryLabel}>{t('events.hostedBy', 'Hosted by')}</Text>
             <Text style={styles.libraryName}>{library.name}</Text>
           </TouchableOpacity>
           
@@ -172,14 +176,14 @@ export default function EventDetailScreen() {
               <View style={styles.infoItem}>
                 <Users size={20} color={Colors.primary[600]} style={styles.infoIcon} />
                 <Text style={styles.infoText}>
-                  {event.attendees} / {event.maxAttendees} attendees
+                  {event.attendees} / {event.maxAttendees} {t('events.attendees', 'attendees')}
                 </Text>
               </View>
             )}
           </View>
           
           <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionTitle}>About this event</Text>
+            <Text style={styles.descriptionTitle}>{t('events.aboutThisEvent', 'About this event')}</Text>
             <Text style={styles.description}>{event.description}</Text>
           </View>
           
@@ -197,7 +201,12 @@ export default function EventDetailScreen() {
               isJoined && styles.leaveButtonText,
               event.status === 'Full' && !isJoined && styles.disabledButtonText
             ]}>
-              {isJoined ? 'Leave Event' : event.status === 'Full' ? 'Event Full' : 'Join Event'}
+              {isJoined 
+                ? t('events.leaveEvent', 'Leave Event') 
+                : event.status === 'Full' 
+                  ? t('events.eventFull', 'Event Full') 
+                  : t('events.joinEvent', 'Join Event')
+              }
             </Text>
           </TouchableOpacity>
           
@@ -206,7 +215,7 @@ export default function EventDetailScreen() {
             onPress={handleViewLibrary}
           >
             <BookOpen size={20} color={Colors.primary[600]} />
-            <Text style={styles.libraryButtonText}>View Library</Text>
+            <Text style={styles.libraryButtonText}>{t('events.viewLibrary', 'View Library')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -8,8 +8,10 @@ import SearchBar from '@/components/SearchBar';
 import EventCard from '@/components/EventCard';
 import { events } from '@/data/events';
 import { EventType } from '@/types/event';
+import { useTranslation } from 'react-i18next';
 
 export default function EventsScreen() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredEvents, setFilteredEvents] = useState(events);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -48,14 +50,14 @@ export default function EventsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Events</Text>
-        <Text style={styles.subtitle}>Discover cultural happenings</Text>
+        <Text style={styles.title}>{t('events.title')}</Text>
+        <Text style={styles.subtitle}>{t('events.subtitle', 'Discover cultural happenings')}</Text>
       </View>
       
       <View style={styles.searchContainer}>
         <SearchBar 
           onSearch={handleSearch}
-          placeholder="Search events..."
+          placeholder={t('events.searchPlaceholder', 'Search events...')}
         />
         
         <TouchableOpacity style={styles.calendarButton}>
@@ -77,7 +79,11 @@ export default function EventsScreen() {
               styles.filterText,
               activeFilter === filter && styles.activeFilterText
             ]}>
-              {filter.charAt(0).toUpperCase() + filter.slice(1)}
+              {filter === 'all' ? t('common.all') :
+               filter === 'open' ? t('events.open') :
+               filter === 'today' ? t('events.today') :
+               filter === 'upcoming' ? t('events.upcoming') : 
+               filter.charAt(0).toUpperCase() + filter.slice(1)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -85,8 +91,8 @@ export default function EventsScreen() {
       
       {filteredEvents.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No events found</Text>
-          <Text style={styles.emptySubtext}>Try adjusting your filters</Text>
+          <Text style={styles.emptyText}>{t('common.noResults')}</Text>
+          <Text style={styles.emptySubtext}>{t('events.adjustFilters', 'Try adjusting your filters')}</Text>
         </View>
       ) : (
         <FlatList

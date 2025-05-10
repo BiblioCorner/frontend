@@ -23,8 +23,10 @@ import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function SignupScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -34,7 +36,7 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
     if (!email || !password || !phoneNumber) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('common.error'), t('common.fillAllFields'));
       return;
     }
 
@@ -42,7 +44,7 @@ export default function SignupScreen() {
       setIsLoading(true);
       await signUp(email, password, phoneNumber);
     } catch (error) {
-      Alert.alert('Error', 'Failed to create account. Please try again.');
+      Alert.alert(t('common.error'), t('auth.signup.errorMessage'));
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +68,7 @@ export default function SignupScreen() {
         />
       </View>
 
-      <Text style={styles.title}>Sign up</Text>
+      <Text style={styles.title}>{t('auth.signup.title')}</Text>
 
       <View style={styles.inputContainer}>
         <View style={styles.inputWrapper}>
@@ -77,7 +79,7 @@ export default function SignupScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder={t('auth.signup.email')}
             placeholderTextColor={Colors.primary[300]}
             value={email}
             onChangeText={setEmail}
@@ -94,7 +96,7 @@ export default function SignupScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder={t('auth.signup.password')}
             placeholderTextColor={Colors.primary[300]}
             value={password}
             onChangeText={setPassword}
@@ -121,7 +123,7 @@ export default function SignupScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder="phone number"
+            placeholder={t('auth.signup.phone')}
             placeholderTextColor={Colors.primary[300]}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
@@ -142,14 +144,14 @@ export default function SignupScreen() {
         {isLoading ? (
           <ActivityIndicator color={Colors.white} />
         ) : (
-          <Text style={styles.signupButtonText}>Sign up</Text>
+          <Text style={styles.signupButtonText}>{t('auth.signup.createAccount')}</Text>
         )}
       </TouchableOpacity>
 
       <View style={styles.loginLink}>
-        <Text style={styles.loginText}>Already have an account! </Text>
+        <Text style={styles.loginText}>{t('auth.signup.haveAccount')} </Text>
         <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-          <Text style={styles.loginLinkText}>Login</Text>
+          <Text style={styles.loginLinkText}>{t('auth.signup.login')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

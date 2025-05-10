@@ -9,11 +9,13 @@ import LibraryCard from '@/components/LibraryCard';
 import { libraries } from '@/data/libraries';
 import { LibraryType } from '@/types/library';
 import * as Location from 'expo-location';
+import { useTranslation } from 'react-i18next';
 
 export default function LibrariesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredLibraries, setFilteredLibraries] = useState(libraries);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (searchQuery) {
@@ -84,23 +86,23 @@ export default function LibrariesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Libraries</Text>
-        <Text style={styles.subtitle}>Find your perfect reading spot</Text>
+        <Text style={styles.title}>{t('home.title')}</Text>
+        <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
       </View>
       
       <View style={styles.searchContainer}>
         <SearchBar 
           onSearch={handleSearch} 
           onLocationSearch={handleLocationSearch}
-          placeholder="Search by name or location..."
+          placeholder={t('home.searchPlaceholder')}
         />
         
       </View>
       
       {filteredLibraries.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No libraries found</Text>
-          <Text style={styles.emptySubtext}>Try adjusting your search</Text>
+          <Text style={styles.emptyText}>{t('home.noLibraries')}</Text>
+          <Text style={styles.emptySubtext}>{t('home.adjustSearch')}</Text>
         </View>
       ) : (
         <FlatList

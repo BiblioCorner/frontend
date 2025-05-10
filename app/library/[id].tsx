@@ -29,8 +29,10 @@ import { libraries } from '@/data/libraries';
 import { events } from '@/data/events';
 import { reviews } from '@/data/reviews';
 import ReviewItem from '@/components/ReviewItem';
+import { useTranslation } from 'react-i18next';
 
 export default function LibraryDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const library = libraries.find(lib => lib.id === id);
   const libraryReviews = reviews.filter(review => review.libraryId === id);
@@ -43,9 +45,9 @@ export default function LibraryDetailScreen() {
   if (!library) {
     return (
       <SafeAreaView style={styles.errorContainer}>
-        <Text style={styles.errorText}>Library not found</Text>
+        <Text style={styles.errorText}>{t('library.notFound', 'Library not found')}</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text style={styles.backButtonText}>{t('common.back')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -76,8 +78,10 @@ export default function LibraryDetailScreen() {
   const handleSave = () => {
     setIsSaved(!isSaved);
     Alert.alert(
-      isSaved ? 'Removed from Bookmarks' : 'Added to Bookmarks',
-      isSaved ? `${library.name} has been removed from your bookmarks` : `${library.name} has been added to your bookmarks`
+      isSaved ? t('library.removedFromBookmarks', 'Removed from Bookmarks') : t('library.addedToBookmarks', 'Added to Bookmarks'),
+      isSaved 
+        ? t('library.removedFromBookmarksMessage', `{{name}} has been removed from your bookmarks`, { name: library.name }) 
+        : t('library.addedToBookmarksMessage', `{{name}} has been added to your bookmarks`, { name: library.name })
     );
   };
 
@@ -206,7 +210,7 @@ export default function LibraryDetailScreen() {
                   activeTab === 'info' && styles.activeTabText,
                 ]}
               >
-                Info
+                {t('library.info', 'Info')}
               </Text>
             </TouchableOpacity>
             
@@ -223,7 +227,7 @@ export default function LibraryDetailScreen() {
                   activeTab === 'events' && styles.activeTabText,
                 ]}
               >
-                Events
+                {t('events.title')}
               </Text>
             </TouchableOpacity>
 
@@ -240,7 +244,7 @@ export default function LibraryDetailScreen() {
                   activeTab === 'reviews' && styles.activeTabText,
                 ]}
               >
-                Reviews
+                {t('library.reviews')}
               </Text>
             </TouchableOpacity>
           </View>

@@ -5,9 +5,11 @@ import { Platform } from 'react-native';
 import { Map, Book, CalendarClock, User } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
+import { useTranslation } from 'react-i18next';
 
 export default function TabLayout() {
   const pathname = usePathname();
+  const { t } = useTranslation();
   
   return (
     <Tabs
@@ -32,21 +34,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Libraries',
+          title: t('tabs.home'),
           tabBarIcon: ({ color, size }) => <Book size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="events"
         options={{
-          title: 'Events',
+          title: t('tabs.events'),
           tabBarIcon: ({ color, size }) => <CalendarClock size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('tabs.profile'),
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
