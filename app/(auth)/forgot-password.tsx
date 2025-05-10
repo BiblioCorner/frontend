@@ -9,33 +9,39 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { router, Link } from 'expo-router';
-import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { ArrowLeft, Mail } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
-import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
   const { t } = useTranslation();
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert(t('common.error'), t('common.fillAllFields'));
+  const handleResetPassword = async () => {
+    if (!email) {
+      Alert.alert(t('common.error'), t('common.enterEmail'));
       return;
     }
 
     try {
       setIsLoading(true);
-      await signIn(email, password);
+      // Implement password reset logic here
+      // This would typically call an API endpoint to send a reset email
+      
+      // Simulate API call with timeout
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      Alert.alert(
+        t('auth.forgotPassword.success'),
+        t('auth.forgotPassword.checkEmail'),
+        [{ text: 'OK', onPress: () => router.push('/(auth)/login') }]
+      );
     } catch (error) {
-      Alert.alert(t('common.error'), t('auth.login.invalidCredentials'));
+      Alert.alert(t('common.error'), t('auth.forgotPassword.failed'));
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +61,10 @@ export default function LoginScreen() {
         />
       </View>
 
-      <Text style={styles.title}>{t('auth.login.title')}</Text>
+      <Text style={styles.title}>{t('auth.forgotPassword.title', 'Forgot Password')}</Text>
+      <Text style={styles.subtitle}>
+        {t('auth.forgotPassword.subtitle', 'Enter your email to receive a password reset link')}
+      </Text>
 
       <View style={styles.inputContainer}>
         <View style={styles.inputWrapper}>
@@ -66,7 +75,7 @@ export default function LoginScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder={t('auth.login.email')}
+            placeholder={t('auth.login.email', 'Email')}
             placeholderTextColor={Colors.primary[300]}
             value={email}
             onChangeText={setEmail}
@@ -74,63 +83,34 @@ export default function LoginScreen() {
             autoCapitalize="none"
           />
         </View>
-
-        <View style={styles.inputWrapper}>
-          <Lock
-            size={20}
-            color={Colors.primary[300]}
-            style={styles.inputIcon}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder={t('auth.login.password')}
-            placeholderTextColor={Colors.primary[300]}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-          />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? (
-              <Eye size={20} color={Colors.primary[300]} />
-            ) : (
-              <EyeOff size={20} color={Colors.primary[300]} />
-            )}
-          </TouchableOpacity>
-        </View>
-
-       <Link href="/(auth)/forgot-password" asChild>
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>{t('auth.login.forgotPassword')}</Text>
-          </TouchableOpacity>
-        </Link>
       </View>
 
       <TouchableOpacity
         style={[
-          styles.loginButton,
-          (isLoading || !email || !password) && styles.loginButtonDisabled,
+          styles.resetButton,
+          (isLoading || !email) && styles.resetButtonDisabled,
         ]}
-        onPress={handleLogin}
-        disabled={isLoading || !email || !password}
+        onPress={handleResetPassword}
+        disabled={isLoading || !email}
       >
         {isLoading ? (
           <ActivityIndicator color={Colors.white} />
         ) : (
-          <Text style={styles.loginButtonText}>{t('auth.login.signIn')}</Text>
+          <Text style={styles.resetButtonText}>
+            {t('auth.forgotPassword.resetPassword', 'Reset Password')}
+          </Text>
         )}
       </TouchableOpacity>
 
-      <View style={styles.signupLink}>
-        <Text style={styles.signupText}>{t('auth.login.noAccount')} </Text>
-        <Link href="/(auth)/signup" asChild>
-          <TouchableOpacity>
-            <Text style={styles.signupLinkText}>{t('auth.login.createAccount')}</Text>
-          </TouchableOpacity>
-        </Link>
+      <View style={styles.loginLink}>
+        <Text style={styles.loginText}>
+          {t('auth.forgotPassword.rememberPassword', 'Remember your password?')} 
+        </Text>
+        <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+          <Text style={styles.loginLinkText}>
+            {t('auth.login.signIn', 'Sign In')}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -170,7 +150,15 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.xxxl,
     color: Colors.primary[600],
     textAlign: 'center',
+    marginBottom: Layout.spacing.md,
+  },
+  subtitle: {
+    fontFamily: Typography.fontFamily.regular,
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    textAlign: 'center',
     marginBottom: Layout.spacing.xl,
+    paddingHorizontal: Layout.spacing.lg,
   },
   inputContainer: {
     width: '100%',
@@ -197,19 +185,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.md,
     color: Colors.text.primary,
   },
-  eyeIcon: {
-    padding: Layout.spacing.xs,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginTop: Layout.spacing.xs,
-  },
-  forgotPasswordText: {
-    fontFamily: Typography.fontFamily.regular,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.primary[600],
-  },
-  loginButton: {
+  resetButton: {
     width: '100%',
     height: 54,
     borderRadius: Layout.borderRadius.md,
@@ -218,27 +194,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: Layout.spacing.xl,
   },
-  loginButtonDisabled: {
+  resetButtonDisabled: {
     backgroundColor: Colors.primary[300],
   },
-  loginButtonText: {
+  resetButtonText: {
     fontFamily: Typography.fontFamily.medium,
     fontSize: Typography.fontSize.md,
     color: Colors.background.primary,
   },
-  signupLink: {
+  loginLink: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  signupText: {
+  loginText: {
     fontFamily: Typography.fontFamily.regular,
     fontSize: Typography.fontSize.sm,
     color: Colors.text.secondary,
   },
-  signupLinkText: {
+  loginLinkText: {
     fontFamily: Typography.fontFamily.medium,
     fontSize: Typography.fontSize.sm,
     color: Colors.primary[600],
+    marginLeft: Layout.spacing.xs,
   },
 });

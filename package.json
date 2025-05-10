@@ -13,6 +13,7 @@
     "@expo-google-fonts/playfair-display": "^0.2.3",
     "@expo/vector-icons": "^14.1.0",
     "@lucide/lab": "^0.1.2",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "expo": "^53.0.9",
@@ -30,9 +31,11 @@
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.7",
     "expo-web-browser": "^14.1.6",
+    "i18next": "^25.1.2",
     "lucide-react-native": "^0.509.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-i18next": "^15.5.1",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-maps": "1.20.1",
@@ -44,7 +47,7 @@
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5"
   },
-    "overrides": {
+  "overrides": {
     "lucide-react-native": {
       "react": "^19"
     }

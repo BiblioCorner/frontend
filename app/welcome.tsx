@@ -4,8 +4,11 @@ import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
+import { useTranslation } from 'react-i18next';
 
 export default function WelcomeScreen() {
+  const { t } = useTranslation();
+  
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
@@ -17,7 +20,7 @@ export default function WelcomeScreen() {
       </View>
 
       <Text style={styles.title}>
-        Trouve ton espace, crée ta connexion.
+        {t('welcome.tagline')}
       </Text>
 
       <View style={styles.buttonContainer}>
@@ -25,14 +28,14 @@ export default function WelcomeScreen() {
           style={[styles.button, styles.loginButton]}
           onPress={() => router.push('/(auth)/login')}
         >
-          <Text style={styles.loginButtonText}>Login</Text>
+          <Text style={styles.loginButtonText}>{t('welcome.login')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.signupButton]}
           onPress={() => router.push('/(auth)/signup')}
         >
-          <Text style={styles.signupButtonText}>Sign-up</Text>
+          <Text style={styles.signupButtonText}>{t('welcome.signup')}</Text>
         </TouchableOpacity>
       </View>
     </View>

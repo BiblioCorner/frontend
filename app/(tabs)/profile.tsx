@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,26 +9,32 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { LogOut, Settings, Bookmark, Star, CreditCard as Edit, User as UserIcon } from 'lucide-react-native';
+import { LogOut, Settings, Bookmark, Star, CreditCard as Edit, User as UserIcon, Globe } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { useLanguage, LANGUAGES } from '@/context/LanguageContext';
+import LanguageSelector from '@/components/LanguageSelector';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  const [languageSelectorVisible, setLanguageSelectorVisible] = useState(false);
 
   const handleSignOut = () => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
+      t('common.logout'),
+      t('profile.logoutConfirmation'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Sign Out',
+          text: t('common.logout'),
           style: 'destructive',
           onPress: signOut,
         },
@@ -40,7 +46,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
+          <Text style={styles.headerTitle}>{t('profile.title', 'Profile')}</Text>
           <TouchableOpacity style={styles.settingsButton}>
             <Settings size={24} color={Colors.text.primary} />
           </TouchableOpacity>
@@ -61,41 +67,49 @@ export default function ProfileScreen() {
           <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
 
           <TouchableOpacity style={styles.editProfileButton}>
-            <Text style={styles.editProfileButtonText}>Edit Profile</Text>
+            <Text style={styles.editProfileButtonText}>{t('profile.editProfile')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>Bookmarks</Text>
+            <Text style={styles.statLabel}>{t('profile.bookmarks', 'Bookmarks')}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statValue}>8</Text>
-            <Text style={styles.statLabel}>Reviews</Text>
+            <Text style={styles.statLabel}>{t('profile.reviews', 'Reviews')}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statValue}>5</Text>
-            <Text style={styles.statLabel}>Events</Text>
+            <Text style={styles.statLabel}>{t('profile.events', 'Events')}</Text>
           </View>
         </View>
 
         <View style={styles.menuSection}>
           <TouchableOpacity style={styles.menuItem}>
             <Bookmark size={20} color={Colors.primary[600]} style={styles.menuIcon} />
-            <Text style={styles.menuText}>Saved Libraries</Text>
+            <Text style={styles.menuText}>{t('profile.savedLibraries')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
             <Star size={20} color={Colors.primary[600]} style={styles.menuIcon} />
-            <Text style={styles.menuText}>My Reviews</Text>
+            <Text style={styles.menuText}>{t('profile.myReviews', 'My Reviews')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem}>
             <UserIcon size={20} color={Colors.primary[600]} style={styles.menuIcon} />
-            <Text style={styles.menuText}>Account Settings</Text>
+            <Text style={styles.menuText}>{t('profile.accountSettings', 'Account Settings')}</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.menuItem} onPress={() => setLanguageSelectorVisible(true)}>
+            <Globe size={20} color={Colors.primary[600]} style={styles.menuIcon} />
+            <Text style={styles.menuText}>{t('profile.language')}</Text>
+            <Text style={styles.languageValue}>
+              {LANGUAGES.find(lang => lang.code === language)?.name || 'English'}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -103,10 +117,15 @@ export default function ProfileScreen() {
             onPress={handleSignOut}
           >
             <LogOut size={20} color={Colors.error[600]} style={styles.menuIcon} />
-            <Text style={[styles.menuText, styles.logoutText]}>Log Out</Text>
+            <Text style={[styles.menuText, styles.logoutText]}>{t('profile.logout')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
+      
+      <LanguageSelector 
+        visible={languageSelectorVisible}
+        onClose={() => setLanguageSelectorVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -259,5 +278,24 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: Colors.error[600],
+  },
+  languageValue: {
+    marginLeft: 'auto',
+    fontFamily: Typography.fontFamily.regular,
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+  },
+  languageSection: {
+    marginTop: Layout.spacing.xxl,
+    marginHorizontal: Layout.spacing.lg,
+    paddingVertical: Layout.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border.light,
+  },
+  languageTitle: {
+    fontFamily: Typography.fontFamily.semiBold,
+    fontSize: Typography.fontSize.lg,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.md,
   },
 });
