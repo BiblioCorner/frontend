@@ -9,6 +9,7 @@ import {
   Linking,
   SafeAreaView,
   Alert,
+  TextInput,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import {
@@ -21,6 +22,8 @@ import {
   Globe,
   Star,
   Calendar,
+  Heart,
+  Send,
 } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
@@ -41,6 +44,8 @@ export default function LibraryDetailScreen() {
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [reviewText, setReviewText] = useState('');
+  const [isLiked, setIsLiked] = useState(false);
   
   if (!library) {
     return (
@@ -83,6 +88,25 @@ export default function LibraryDetailScreen() {
         ? t('library.removedFromBookmarksMessage', `{{name}} has been removed from your bookmarks`, { name: library.name }) 
         : t('library.addedToBookmarksMessage', `{{name}} has been added to your bookmarks`, { name: library.name })
     );
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    Alert.alert(
+      isLiked ? 'Removed Like' : 'Added Like',
+      isLiked 
+        ? `You no longer like ${library.name}` 
+        : `You now like ${library.name}`
+    );
+  };
+
+  const handleSubmitReview = () => {
+    if (reviewText.trim().length > 0) {
+      Alert.alert('Review Submitted', 'Thank you for your review!');
+      setReviewText('');
+    } else {
+      Alert.alert('Error', 'Please write a review before submitting');
+    }
   };
 
   const displayedReviews = showAllReviews ? libraryReviews : libraryReviews.slice(0, 2);
@@ -320,9 +344,22 @@ export default function LibraryDetailScreen() {
             <View style={styles.reviewsContainer}>
               <View style={styles.reviewsHeader}>
                 <Text style={styles.sectionTitle}>Reviews</Text>
-                <TouchableOpacity style={styles.addReviewButton}>
-                  <Star size={16} color={Colors.white} />
-                  <Text style={styles.addReviewButtonText}>Write Review</Text>
+              </View>
+              
+              <View style={styles.reviewInputContainer}>
+                <TextInput
+                  style={styles.reviewInput}
+                  placeholder="Write your review here..."
+                  placeholderTextColor={Colors.gray[400]}
+                  value={reviewText}
+                  onChangeText={setReviewText}
+                  multiline
+                />
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={handleSubmitReview}
+                >
+                  <Send size={20} color={Colors.white} />
                 </TouchableOpacity>
               </View>
               
@@ -632,19 +669,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Layout.spacing.md,
   },
-  addReviewButton: {
-    flexDirection: 'row',
+  likeButton: {
     alignItems: 'center',
-    backgroundColor: Colors.primary[600],
+    justifyContent: 'center',
+    backgroundColor: Colors.background.primary,
     paddingHorizontal: Layout.spacing.md,
     paddingVertical: Layout.spacing.sm,
     borderRadius: Layout.borderRadius.md,
-    gap: Layout.spacing.xs,
+    borderWidth: 1,
+    borderColor: Colors.primary[600],
   },
-  addReviewButtonText: {
-    fontFamily: Typography.fontFamily.medium,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.white,
+  likeButtonActive: {
+    backgroundColor: Colors.primary[600],
+  },
+  reviewInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.lg,
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.lg,
+    padding: Layout.spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border.light,
+  },
+  reviewInput: {
+    flex: 1,
+    fontFamily: Typography.fontFamily.regular,
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.primary,
+    padding: Layout.spacing.sm,
+    maxHeight: 100,
+  },
+  submitButton: {
+    backgroundColor: Colors.primary[600],
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   showMoreButton: {
     paddingVertical: Layout.spacing.md,
