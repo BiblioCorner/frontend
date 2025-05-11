@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ViewStyle, TextStyle } from 'react-native';
 import { useLanguage, LANGUAGES } from '@/context/LanguageContext';
 import { useTranslation } from 'react-i18next';
-import Colors from '@/constants/Colors';
-import Typography from '@/constants/Typography';
+import styles from './LanguageSelector.styles';
+
 
 interface LanguageSelectorProps {
   visible: boolean;
@@ -62,68 +62,3 @@ export default function LanguageSelector({ visible, onClose }: LanguageSelectorP
   );
 }
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  } as ViewStyle,
-  modalContent: {
-    backgroundColor: Colors.background.primary,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    paddingBottom: 40,
-  } as ViewStyle,
-  modalTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontFamily: Typography.fontFamily.bold,
-    textAlign: 'center',
-    marginBottom: 20,
-  } as TextStyle,
-  languageOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  } as ViewStyle,
-  selectedLanguage: {
-    backgroundColor: Colors.background.secondary,
-  } as ViewStyle,
-  languageText: {
-    fontSize: Typography.fontSize.md,
-    fontFamily: Typography.fontFamily.medium,
-  } as TextStyle,
-  selectedLanguageText: {
-    fontSize: Typography.fontSize.md,
-    fontFamily: Typography.fontFamily.semiBold,
-    color: Colors.text.primary,
-  } as TextStyle,
-  checkmark: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.primary[500],
-    justifyContent: 'center',
-    alignItems: 'center',
-  } as ViewStyle,
-  checkmarkText: {
-    color: Colors.background.primary,
-    fontWeight: 'bold',
-  } as TextStyle,
-  cancelButton: {
-    marginTop: 20,
-    paddingVertical: 15,
-    borderRadius: 10,
-    backgroundColor: Colors.background.tertiary,
-    alignItems: 'center',
-  } as ViewStyle,
-  cancelButtonText: {
-    fontSize: Typography.fontSize.md,
-    fontFamily: Typography.fontFamily.semiBold,
-    color: Colors.text.primary,
-  } as TextStyle,
-});
