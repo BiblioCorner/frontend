@@ -147,6 +147,7 @@
 
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
 // Interfaces
@@ -214,36 +215,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/auth/signin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+  
+ const signIn = async (email: string, password: string) => {
+  setIsLoading(true);
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Échec de la connexion');
-      }
-
-      const data = await res.json();
-      const newUser: User = {
-        id: data._id || data.id,
-        email: data.email,
-        name: `${data.first_name} ${data.last_name}`,
-      };
-
-      setUser(newUser);
-      router.replace('/(tabs)');
-    } catch (error) {
-      console.error('Sign in failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Échec de la connexion');
     }
-  };
+
+    const data = await res.json();
+    const token = data.token;
+    console.log('JWT Token reçu :', token);
+    await AsyncStorage.setItem('token', token);
+    const newUser: User = {
+      id: data.userId,
+      email: email,
+    };
+    setUser(newUser);
+    router.replace('/(tabs)');
+  } catch (error) {
+    console.error('Sign in failed:', error);
+    throw error;
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const signUp = async (userData: SignupPayload) => {
     setIsLoading(true);
@@ -268,7 +271,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       setUser(newUser);
-      router.replace('/(tabs)');
+      router.replace('/login');
     } catch (error) {
       console.error('Sign up failed:', error);
       throw error;
