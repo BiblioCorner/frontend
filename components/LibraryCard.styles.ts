@@ -35,7 +35,9 @@ const styles = StyleSheet.create<Styles>({
   },
   image: {
     width: '100%',
-    height: 160,
+    height: 150, // ← obligatoire
+    borderRadius: 10,
+    backgroundColor: '#ccc', // pour voir s'il y a un trou d'affichage
   },
   content: {
     padding: Layout.spacing.md,

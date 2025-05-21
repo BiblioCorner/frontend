@@ -12,6 +12,8 @@ interface LibraryCardProps {
 
 export default function LibraryCard({ library }: LibraryCardProps) {
   console.log({library});
+
+  console.log('Library:', library._id, library.name);
   
   return (
     <TouchableOpacity
@@ -19,6 +21,11 @@ export default function LibraryCard({ library }: LibraryCardProps) {
       onPress={() => router.push(`/library/${library._id}`)}
       activeOpacity={0.7}
     >
+     <Image
+        source={{ uri: "https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg" }}
+        style={styles.image}
+        resizeMode="cover"
+      />
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>{library.name}</Text>

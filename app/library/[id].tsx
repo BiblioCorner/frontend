@@ -156,20 +156,17 @@ export default function LibraryDetailScreen() {
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          {/* <ScrollView
+          {<ScrollView
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
           >
-            {library.images.map((image, index) => (
-              <Image
-                key={index}
-                source={{ uri: image }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            ))}
-          </ScrollView> */}
+          <Image
+  source={{ uri: "https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg" }}
+  style={styles.image}
+  resizeMode="cover"
+/>
+          </ScrollView>}
 
           <SafeAreaView style={styles.header}>
             <TouchableOpacity

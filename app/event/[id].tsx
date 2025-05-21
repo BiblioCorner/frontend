@@ -40,8 +40,8 @@ export default function EventDetailScreen() {
   const fetchEvent = async () => {
     try {
       const data = await getEventById(id as string);
-      console.log({data});
-      
+      console.log({ data });
+
       setEvent(data);
       setLibrary(data.library_id);
 
@@ -80,6 +80,19 @@ export default function EventDetailScreen() {
     );
   }
 
+  const LIBRARY_IMAGES = [
+    "https://images.pexels.com/photos/2041556/pexels-photo-2041556.jpeg",
+    "https://images.pexels.com/photos/159775/library-la-trobe-study-students-159775.jpeg",
+    "https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg",
+    "https://images.pexels.com/photos/1290141/pexels-photo-1290141.jpeg",
+    "https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg",
+  ];
+
+  const getLibraryImage = (libraryId: string) => {
+    const index = parseInt(libraryId) % LIBRARY_IMAGES.length; // Permet de boucler sur les 5 images
+    return LIBRARY_IMAGES[index];
+  };
+
   const handleJoinEvent = () => {
     if (status === 'Full') {
       Alert.alert(
@@ -96,13 +109,13 @@ export default function EventDetailScreen() {
         : t('events.joinedEvent', 'Joined Event'),
       isJoined
         ? t('events.leftEventMessage', 'You have left {{title}}', {
-            title: event.name,
-          })
+          title: event.name,
+        })
         : t(
-            'events.joinedEventMessage',
-            'You have successfully joined {{title}}',
-            { title: event.name }
-          )
+          'events.joinedEventMessage',
+          'You have successfully joined {{title}}',
+          { title: event.name }
+        )
     );
   };
 
@@ -147,14 +160,15 @@ export default function EventDetailScreen() {
   };
 
   return (
+
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          {/* <Image
-            source={{ uri: event.imageUrl }}
+          <Image
+            source={{ uri: "https://images.pexels.com/photos/7681731/pexels-photo-7681731.jpeg" }}
             style={styles.image}
             resizeMode="cover"
-          /> */}
+          />
 
           <SafeAreaView style={styles.header}>
             <TouchableOpacity
@@ -172,7 +186,7 @@ export default function EventDetailScreen() {
 
         <View style={styles.contentContainer}>
           <View style={styles.statusContainer}>
-        
+
             <View
               style={[
                 styles.statusBadge,
@@ -256,15 +270,15 @@ export default function EventDetailScreen() {
                 styles.joinButtonText,
                 isJoined && styles.leaveButtonText,
                 status === 'Full' &&
-                  !isJoined &&
-                  styles.disabledButtonText,
+                !isJoined &&
+                styles.disabledButtonText,
               ]}
             >
               {isJoined
                 ? t('events.leaveEvent', 'Leave Event')
                 : status === 'Full'
-                ? t('events.eventFull', 'Event Full')
-                : t('events.joinEvent', 'Join Event')}
+                  ? t('events.eventFull', 'Event Full')
+                  : t('events.joinEvent', 'Join Event')}
             </Text>
           </TouchableOpacity>
 

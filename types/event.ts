@@ -8,4 +8,5 @@ export interface EventType {
   library_id: string;
   address: string;
   register_link: string;
+  imageUrl: string;
 }
