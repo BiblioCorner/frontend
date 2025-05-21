@@ -28,3 +28,17 @@ export const getEventById = async (id: string) => {
         throw error;
     }
 }
+
+export const getEventByLibraryId = async (libraryId: string) => {
+    try {
+        const response = await fetch(`${env.apiUrl}/event/library/${libraryId}`);
+        if (!response.ok) {
+        throw new Error('Failed to fetch events');
+        }
+        const text = await response.text();
+        return JSON.parse(text);
+    } catch (error) {
+        console.error('[getEventByLibraryId] : Error fetching events:', error);
+        throw error;
+    }
+}

@@ -34,14 +34,17 @@ import { reviews } from '@/data/reviews';
 import ReviewItem from '@/components/ReviewItem';
 import { useTranslation } from 'react-i18next';
 import { getLibraryById } from '@/services/library.service';
+import { getEventByLibraryId } from '@/services/event.service';
+import { getReviewsByLibraryId } from '@/services/review.service';
+import { EventType } from '@/types/event';
+import { ReviewType } from '@/types/review';
 
 export default function LibraryDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const [library, setLibrary] = useState<LibraryType | null>(null);
-  const libraryReviews = reviews.filter((review) => review.libraryId === '1');
-  const libraryEvents = events.filter((event) => event.libraryId === '1');
-
+  const [libraryEvents, setLibraryEvents] = useState<EventType[]>([]);
+  const [libraryReviews, setLibraryReviews] = useState<ReviewType[]>([]);
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -51,10 +54,14 @@ export default function LibraryDetailScreen() {
   // Fetch library data by ID
   const fetchLibraryData = async () => {
     try {
-      console.log({id});
-      
+      console.log({ id });
+
       const library = await getLibraryById(id as string);
       setLibrary(library);
+      const libraryEventsData = await getEventByLibraryId(id as string);
+      setLibraryEvents(libraryEventsData);
+      const libraryReviewsData = await getReviewsByLibraryId(id as string);
+      setLibraryReviews(libraryReviewsData);
     } catch (error) {
       console.error('Error fetching library data:', error);
     }
@@ -205,7 +212,8 @@ export default function LibraryDetailScreen() {
                 fill={Colors.accent[500]}
               />
               <Text style={styles.rating}>
-                {library.rating.toFixed(1)} ({reviews.length} {t('library.reviews').toLowerCase()})
+                {library.rating.toFixed(1)} ({reviews.length}{' '}
+                {t('library.reviews').toLowerCase()})
               </Text>
             </View>
 
@@ -221,17 +229,18 @@ export default function LibraryDetailScreen() {
               <View>
                 {library.opening_hours && library.opening_hours.length > 0 ? (
                   <View>
-                  {library.opening_hours.map((hours, index) => (
-                    <Text key={index} style={styles.hours}>
-                    {hours.day}: {hours.is_open === 'Ouvert' 
-                      ? `${hours.open_time} - ${hours.close_time}`
-                      : t('library.closed')}
-                    </Text>
-                  ))}
+                    {library.opening_hours.map((hours, index) => (
+                      <Text key={index} style={styles.hours}>
+                        {hours.day}:{' '}
+                        {hours.is_open === 'Ouvert'
+                          ? `${hours.open_time} - ${hours.close_time}`
+                          : t('library.closed')}
+                      </Text>
+                    ))}
                   </View>
                 ) : (
                   <Text style={styles.hours}>
-                  {t('library.noHoursInfo', 'No hours information available')}
+                    {t('library.noHoursInfo', 'No hours information available')}
                   </Text>
                 )}
               </View>
@@ -254,7 +263,9 @@ export default function LibraryDetailScreen() {
               onPress={handleOpenMap}
             >
               <MapPin size={20} color={Colors.primary[600]} />
-              <Text style={styles.actionButtonText}>{t('library.viewMaps')}</Text>
+              <Text style={styles.actionButtonText}>
+                {t('library.viewMaps')}
+              </Text>
             </TouchableOpacity>
 
             {library.website && (
@@ -263,7 +274,9 @@ export default function LibraryDetailScreen() {
                 onPress={handleVisitWebsite}
               >
                 <Globe size={20} color={Colors.primary[600]} />
-                <Text style={styles.actionButtonText}>{t('library.website')}</Text>
+                <Text style={styles.actionButtonText}>
+                  {t('library.website')}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -312,137 +325,127 @@ export default function LibraryDetailScreen() {
             </TouchableOpacity>
           </View>
 
-       {activeTab === 'info' && (
-  <View style={styles.infoContainer}>
-    <View>
-      <Text style={styles.sectionTitle}>
-        {t('library.about', 'About')}
-      </Text>
-      <Text style={styles.description}>{library.name}</Text>
-    </View>
+          {activeTab === 'info' && (
+            <View style={styles.infoContainer}>
+              <View>
+                <Text style={styles.sectionTitle}>
+                  {t('library.about', 'About')}
+                </Text>
+                <Text style={styles.description}>{library.name}</Text>
+              </View>
 
-    <View style={styles.servicesContainer}>
-      <Text style={styles.sectionTitle}>
-        {t('library.services', 'Services')}
-      </Text>
-      <View style={styles.servicesList}>
-        <View style={styles.serviceItem}>
-          <Text style={styles.serviceText}>{library.services}</Text>
-        </View>
-      </View>
-    </View>
+              <View style={styles.servicesContainer}>
+                <Text style={styles.sectionTitle}>
+                  {t('library.services', 'Services')}
+                </Text>
+                <View style={styles.servicesList}>
+                  <View style={styles.serviceItem}>
+                    <Text style={styles.serviceText}>{library.services}</Text>
+                  </View>
+                </View>
+              </View>
 
-    <View style={styles.tagsContainer}>
-      <Text style={styles.sectionTitle}>
-        {t('library.accessibility', 'Accessibility')}
-      </Text>
-      <View style={styles.tagsList}>
-        <View style={styles.tagItem}>
-          <Text style={styles.tagText}>{library.accessibility}</Text>
-        </View>
-      </View>
-    </View>
-  </View>
-)}
-
-{activeTab === 'events' && (
-  <View style={styles.eventsContainer}>
-    <Text style={styles.sectionTitle}>
-      {t('library.upcomingEvents', 'Upcoming Events')}
-    </Text>
-    {libraryEvents.length > 0 ? (
-      libraryEvents.map((event) => (
-        <TouchableOpacity
-          key={event.id}
-          style={styles.eventCard}
-          onPress={() => router.push(`/event/${event.id}`)}
-        >
-          <Image
-            source={{ uri: event.imageUrl }}
-            style={styles.eventImage}
-            resizeMode="cover"
-          />
-          <View style={styles.eventInfo}>
-            <Text style={styles.eventTitle}>{event.title}</Text>
-            <View style={styles.eventDetails}>
-              <Calendar
-                size={14}
-                color={Colors.gray[500]}
-                style={styles.icon}
-              />
-              <Text style={styles.eventDate}>
-                {event.date} • {event.time}
-              </Text>
+              <View style={styles.tagsContainer}>
+                <Text style={styles.sectionTitle}>
+                  {t('library.accessibility', 'Accessibility')}
+                </Text>
+                <View style={styles.tagsList}>
+                  <View style={styles.tagItem}>
+                    <Text style={styles.tagText}>{library.accessibility}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
-            <View
-              style={[
-                styles.eventStatus,
-                { backgroundColor: getStatusColor(event.status) },
-              ]}
-            >
-              <Text style={styles.eventStatusText}>
-                {event.status}
+          )}
+
+          {activeTab === 'events' && (
+            <View style={styles.eventsContainer}>
+              <Text style={styles.sectionTitle}>
+                {t('library.upcomingEvents', 'Upcoming Events')}
               </Text>
+              {libraryEvents.length > 0 ? (
+                libraryEvents.map((event) => (
+                  <TouchableOpacity
+                    key={event._id}
+                    style={styles.eventCard}
+                    onPress={() => router.push(`/event/${event._id}`)}
+                  >
+                 
+                    <View style={styles.eventInfo}>
+                      <Text style={styles.eventTitle}>{event.name}</Text>
+                      <View style={styles.eventDetails}>
+                        <Calendar
+                          size={14}
+                          color={Colors.gray[500]}
+                          style={styles.icon}
+                        />
+                        <Text style={styles.eventDate}>
+                          {new Date(event.date).toLocaleDateString()} • {new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Text>
+                      </View>
+                     
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.noEventsText}>
+                  {t('library.noUpcomingEvents', 'No upcoming events')}
+                </Text>
+              )}
             </View>
-          </View>
-        </TouchableOpacity>
-      ))
-    ) : (
-      <Text style={styles.noEventsText}>
-        {t('library.noUpcomingEvents', 'No upcoming events')}
-      </Text>
-    )}
-  </View>
-)}
+          )}
 
-{activeTab === 'reviews' && (
-  <View style={styles.reviewsContainer}>
-    <View style={styles.reviewsHeader}>
-      <Text style={styles.sectionTitle}>
-        {t('library.reviews', 'Reviews')}
-      </Text>
-    </View>
+          {activeTab === 'reviews' && (
+            <View style={styles.reviewsContainer}>
+              <View style={styles.reviewsHeader}>
+                <Text style={styles.sectionTitle}>
+                  {t('library.reviews', 'Reviews')}
+                </Text>
+              </View>
 
-    <View style={styles.reviewInputContainer}>
-      <TextInput
-        style={styles.reviewInput}
-        placeholder={t('library.writeReview', 'Write your review here...')}
-        placeholderTextColor={Colors.gray[400]}
-        value={reviewText}
-        onChangeText={setReviewText}
-        multiline
-      />
-      <TouchableOpacity
-        style={styles.submitButton}
-        onPress={handleSubmitReview}
-      >
-        <Send size={20} color={Colors.white} />
-      </TouchableOpacity>
-    </View>
+              <View style={styles.reviewInputContainer}>
+                <TextInput
+                  style={styles.reviewInput}
+                  placeholder={t(
+                    'library.writeReview',
+                    'Write your review here...'
+                  )}
+                  placeholderTextColor={Colors.gray[400]}
+                  value={reviewText}
+                  onChangeText={setReviewText}
+                  multiline
+                />
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={handleSubmitReview}
+                >
+                  <Send size={20} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
 
-    {displayedReviews.map((review) => (
-      <ReviewItem
-        key={review.id}
-        review={review}
-        onReport={() => {}}
-      />
-    ))}
+              {displayedReviews.map((review) => (
+                <ReviewItem
+                  key={review._id}
+                  review={review}
+                  onReport={() => {}}
+                />
+              ))}
 
-    {libraryReviews.length > 2 && !showAllReviews && (
-      <TouchableOpacity
-        style={styles.showMoreButton}
-        onPress={() => setShowAllReviews(true)}
-      >
-        <Text style={styles.showMoreButtonText}>
-          {t('library.showAllReviews', {
-            defaultValue: 'Show All {{count}} Reviews',
-            count: libraryReviews.length,
-          })}
-        </Text>
-      </TouchableOpacity>
-    )}
-  </View>
-)}
+              {libraryReviews.length > 2 && !showAllReviews && (
+                <TouchableOpacity
+                  style={styles.showMoreButton}
+                  onPress={() => setShowAllReviews(true)}
+                >
+                  <Text style={styles.showMoreButtonText}>
+                    {t('library.showAllReviews', {
+                      defaultValue: 'Show All {{count}} Reviews',
+                      count: libraryReviews.length,
+                    })}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
