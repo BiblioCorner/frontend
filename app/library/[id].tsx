@@ -33,6 +33,7 @@ import { events } from '@/data/events';
 import { reviews } from '@/data/reviews';
 import ReviewItem from '@/components/ReviewItem';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LibraryDetailScreen() {
   const { t } = useTranslation();
@@ -100,14 +101,65 @@ export default function LibraryDetailScreen() {
     );
   };
 
-  const handleSubmitReview = () => {
-    if (reviewText.trim().length > 0) {
-      Alert.alert('Review Submitted', 'Thank you for your review!');
+  // const handleSubmitReview = () => {
+  //   if (reviewText.trim().length > 0) {
+  //     Alert.alert('Review Submitted', 'Thank you for your review!');
+  //     setReviewText('');
+  //   } else {
+  //     Alert.alert('Error', 'Please write a review before submitting');
+  //   }
+  // };
+
+
+//   const handleSubmitReview = async () => {
+//   if (reviewText.trim().length === 0) {
+//     Alert.alert('Error', 'Please write a review before submitting');
+//     return;
+//   }
+
+//   try {
+//     const token = "TON_TOKEN_JWT_ICI"; 
+
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+
+const handleSubmitReview = async () => {
+  if (reviewText.trim().length === 0) {
+    Alert.alert('Erreur', 'Veuillez écrire un commentaire avant de l’envoyer');
+    return;
+  }
+
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+      Alert.alert('Erreur', 'Utilisateur non authentifié');
+      return;
+    }
+  console.log("Library ID envoyé :", id);
+    const res = await fetch(`${API_BASE_URL}/review/${library.name}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ 
+        content: reviewText,
+     }),
+    });
+
+    const data = await res.json(); 
+
+    if (res.ok) {
+      Alert.alert('Commentaire envoyé', 'Merci pour votre avis !');
       setReviewText('');
     } else {
-      Alert.alert('Error', 'Please write a review before submitting');
+      Alert.alert('Erreur', data.message || 'Échec de l\'envoi du commentaire');
     }
-  };
+  } catch (error) {
+    console.error(error);
+    Alert.alert('Erreur', 'Une erreur est survenue lors de l\'envoi');
+  }
+};
 
   const displayedReviews = showAllReviews ? libraryReviews : libraryReviews.slice(0, 2);
 

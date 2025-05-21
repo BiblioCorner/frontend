@@ -46,7 +46,10 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('profile.title', 'Profile')}</Text>
+          {/* <Text style={styles.headerTitle}>{t('profile.title', 'Profile')}</Text> */}
+          <Text style={styles.userName}>
+  {(user?.first_name || '') + ' ' + (user?.last_name || '') || 'User'}
+</Text>
           <TouchableOpacity style={styles.settingsButton}>
             <Settings size={24} color={Colors.text.primary} />
           </TouchableOpacity>
@@ -63,7 +66,8 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.userName}>{user?.name || 'User'}</Text>
+          <Text style={styles.userName}>{user?.first_name || 'User'}</Text>
+          <Text style={styles.userName}>{user?.last_name || 'User'}</Text>
           <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
 
           <TouchableOpacity style={styles.editProfileButton}>
