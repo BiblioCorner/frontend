@@ -279,17 +279,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await res.json();
       router.replace('/login');
-      const newUser: User = {
-        id: data._id || data.id,
-        email: data.email,
-        // name: `${data.first_name} ${data.last_name}`,
-        first_name: data.first_name,
-        last_name: data.last_name,
-      };
-
-      setUser(newUser);
-      // router.replace('/login');
-      router.replace('/(auth)/login');
     } catch (error) {
       console.error('Erreur:', error);
       throw error;
