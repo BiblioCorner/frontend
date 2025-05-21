@@ -11,60 +11,71 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event }: EventCardProps) {
+  const start = new Date(event.start_time);
+  const end = new Date(event.end_time);
+  const now = new Date();  
+
+  let status: 'Open' | 'Limited' | 'Full';
+  if (start > now && now < end) {
+    status = 'Open';
+  } else if (end < now) {
+    status = 'Full';
+  } else {
+    status = 'Limited';
+  }
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.container}
-      onPress={() => router.push(`/event/${event.id}`)}
+      onPress={() => router.push(`/event/${event._id}`)}
       activeOpacity={0.7}
     >
-      <Image
-        source={{ uri: event.imageUrl }}
-        style={styles.image}
-        resizeMode="cover"
-      />
-      
       <View style={styles.content}>
         <View style={styles.libraryRow}>
-          <Text style={styles.libraryName}>{event.libraryName}</Text>
-          <View style={[styles.badge, { backgroundColor: getStatusColor(event.status) }]}>
-            <Text style={styles.badgeText}>{event.status}</Text>
+          <Text style={styles.libraryName}>{event.name}</Text>
+          <View
+            style={[
+              styles.badge,
+              {
+                backgroundColor: getStatusColor(status),
+              },
+            ]}
+          >
+            <Text style={styles.badgeText}>
+              {status}
+            </Text>
           </View>
         </View>
-        
-        <Text style={styles.title}>{event.title}</Text>
-        
         <View style={styles.infoContainer}>
           <View style={styles.infoRow}>
-            <Calendar size={14} color={Colors.gray[500]} style={styles.infoIcon} />
-            <Text style={styles.infoText}>{event.date}</Text>
+            <Calendar
+              size={14}
+              color={Colors.gray[500]}
+              style={styles.infoIcon}
+            />
+            <Text style={styles.infoText}>{start.toLocaleDateString()}</Text>
           </View>
-          
+
           <View style={styles.infoRow}>
             <Clock size={14} color={Colors.gray[500]} style={styles.infoIcon} />
-            <Text style={styles.infoText}>{event.time}</Text>
+            <Text style={styles.infoText}>{start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </View>
-          
-          {event.attendees && (
-            <View style={styles.infoRow}>
-              <Users size={14} color={Colors.gray[500]} style={styles.infoIcon} />
-              <Text style={styles.infoText}>{event.attendees} attendees</Text>
-            </View>
-          )}
         </View>
-        
+
         <View style={styles.footer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
               styles.button,
-              event.status === 'Full' ? styles.buttonDisabled : null
+              status === 'Full' ? styles.buttonDisabled : null,
             ]}
-            disabled={event.status === 'Full'}
+            disabled={status === 'Full'}
           >
-            <Text style={[
-              styles.buttonText,
-              event.status === 'Full' ? styles.buttonTextDisabled : null
-            ]}>
-              {event.status === 'Full' ? 'Full' : 'Join Event'}
+            <Text
+              style={[
+                styles.buttonText,
+                status === 'Full' ? styles.buttonTextDisabled : null,
+              ]}
+            >
+              {status === 'Full' ? 'Full' : 'Join Event'}
             </Text>
           </TouchableOpacity>
         </View>

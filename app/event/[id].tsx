@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -23,23 +23,57 @@ import {
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
-import { events } from '@/data/events';
-import { libraries } from '@/data/libraries';
 import { useTranslation } from 'react-i18next';
+import { getEventById } from '@/services/event.service';
+import { getLibraryById } from '@/services/library.service';
+import { EventType } from '@/types/event';
+import { LibraryType } from '@/types/library';
 
 export default function EventDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
-  const event = events.find(evt => evt.id === id);
-  const library = event ? libraries.find(lib => lib.id === event.libraryId) : null;
-  
+  const [event, setEvent] = useState<EventType>();
+  const [library, setLibrary] = useState<LibraryType>();
+
   const [isJoined, setIsJoined] = useState(false);
-  
+  const [status, setStatus] = useState<'Open' | 'Limited' | 'Full'>('Open');
+  const fetchEvent = async () => {
+    try {
+      const data = await getEventById(id as string);
+      console.log({data});
+      
+      setEvent(data);
+      setLibrary(data.library_id);
+
+      const start = new Date(data.start_time);
+      const end = new Date(data.end_time);
+      const now = new Date();
+
+      if (start > now && now < end) {
+        setStatus('Open');
+      } else if (end < now) {
+        setStatus('Full');
+      } else {
+        setStatus('Limited');
+      }
+    } catch (error) {
+      console.error('Error fetching event:', error);
+    }
+  };
+  useEffect(() => {
+    fetchEvent();
+  }, [id]);
+
   if (!event || !library) {
     return (
       <SafeAreaView style={styles.errorContainer}>
-        <Text style={styles.errorText}>{t('events.notFound', 'Event not found')}</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.errorText}>
+          {t('events.notFound', 'Event not found')}
+        </Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Text style={styles.backButtonText}>{t('common.back')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -47,26 +81,37 @@ export default function EventDetailScreen() {
   }
 
   const handleJoinEvent = () => {
-    if (event.status === 'Full') {
-      Alert.alert(t('common.sorry', 'Sorry'), t('events.eventFull', 'This event is already full'));
+    if (status === 'Full') {
+      Alert.alert(
+        t('common.sorry', 'Sorry'),
+        t('events.eventFull', 'This event is already full')
+      );
       return;
     }
-    
+
     setIsJoined(!isJoined);
     Alert.alert(
-      isJoined ? t('events.leftEvent', 'Left Event') : t('events.joinedEvent', 'Joined Event'),
-      isJoined 
-        ? t('events.leftEventMessage', 'You have left {{title}}', { title: event.title }) 
-        : t('events.joinedEventMessage', 'You have successfully joined {{title}}', { title: event.title })
+      isJoined
+        ? t('events.leftEvent', 'Left Event')
+        : t('events.joinedEvent', 'Joined Event'),
+      isJoined
+        ? t('events.leftEventMessage', 'You have left {{title}}', {
+            title: event.name,
+          })
+        : t(
+            'events.joinedEventMessage',
+            'You have successfully joined {{title}}',
+            { title: event.name }
+          )
     );
   };
 
   const handleShare = () => {
-    Alert.alert('Share', `Sharing ${event.title} with friends`);
+    Alert.alert('Share', `Sharing ${event.name} with friends`);
   };
 
   const handleViewLibrary = () => {
-    router.push(`/library/${library.id}`);
+    router.push(`/library/${library._id}`);
   };
 
   const handleOpenMap = () => {
@@ -105,12 +150,12 @@ export default function EventDetailScreen() {
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image
+          {/* <Image
             source={{ uri: event.imageUrl }}
             style={styles.image}
             resizeMode="cover"
-          />
-          
+          /> */}
+
           <SafeAreaView style={styles.header}>
             <TouchableOpacity
               style={styles.backButton}
@@ -118,104 +163,119 @@ export default function EventDetailScreen() {
             >
               <ArrowLeft size={24} color={Colors.white} />
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.shareButton}
-              onPress={handleShare}
-            >
+
+            <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
               <Share2 size={24} color={Colors.white} />
             </TouchableOpacity>
           </SafeAreaView>
         </View>
-        
+
         <View style={styles.contentContainer}>
           <View style={styles.statusContainer}>
-            <Text style={styles.category}>{event.category}</Text>
-            <View style={[
-              styles.statusBadge,
-              { backgroundColor: getStatusColor(event.status) }
-            ]}>
-              <Text style={[
-                styles.statusText,
-                { color: getStatusTextColor(event.status) }
-              ]}>
-                {event.status}
+        
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(status) },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  { color: getStatusTextColor(status) },
+                ]}
+              >
+                {status}
               </Text>
             </View>
           </View>
-          
-          <Text style={styles.title}>{event.title}</Text>
-          
+
+          <Text style={styles.title}>{event.name}</Text>
+
           <TouchableOpacity
             style={styles.libraryContainer}
             onPress={handleViewLibrary}
           >
-            <Text style={styles.libraryLabel}>{t('events.hostedBy', 'Hosted by')}</Text>
+            <Text style={styles.libraryLabel}>
+              {t('events.hostedBy', 'Hosted by')}
+            </Text>
             <Text style={styles.libraryName}>{library.name}</Text>
           </TouchableOpacity>
-          
+
           <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
-              <Calendar size={20} color={Colors.primary[600]} style={styles.infoIcon} />
-              <Text style={styles.infoText}>{event.date}</Text>
+              <Calendar
+                size={20}
+                color={Colors.primary[600]}
+                style={styles.infoIcon}
+              />
+              <Text style={styles.infoText}>{event.date.toString()}</Text>
             </View>
-            
+
             <View style={styles.infoItem}>
-              <Clock size={20} color={Colors.primary[600]} style={styles.infoIcon} />
-              <Text style={styles.infoText}>{event.time}</Text>
+              <Clock
+                size={20}
+                color={Colors.primary[600]}
+                style={styles.infoIcon}
+              />
+              <Text style={styles.infoText}>
+                {new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
             </View>
-            
+
             <TouchableOpacity style={styles.infoItem} onPress={handleOpenMap}>
-              <MapPin size={20} color={Colors.primary[600]} style={styles.infoIcon} />
+              <MapPin
+                size={20}
+                color={Colors.primary[600]}
+                style={styles.infoIcon}
+              />
               <Text style={[styles.infoText, styles.infoTextLink]}>
-                {event.location || library.address}
+                {event.address || library.address}
               </Text>
             </TouchableOpacity>
-            
-            {event.attendees && event.maxAttendees && (
-              <View style={styles.infoItem}>
-                <Users size={20} color={Colors.primary[600]} style={styles.infoIcon} />
-                <Text style={styles.infoText}>
-                  {event.attendees} / {event.maxAttendees} {t('events.attendees', 'attendees')}
-                </Text>
-              </View>
-            )}
           </View>
-          
+
           <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionTitle}>{t('events.aboutThisEvent', 'About this event')}</Text>
+            <Text style={styles.descriptionTitle}>
+              {t('events.aboutThisEvent', 'About this event')}
+            </Text>
             <Text style={styles.description}>{event.description}</Text>
           </View>
-          
+
           <TouchableOpacity
             style={[
               styles.joinButton,
               isJoined && styles.leaveButton,
-              event.status === 'Full' && !isJoined && styles.disabledButton
+              status === 'Full' && !isJoined && styles.disabledButton,
             ]}
             onPress={handleJoinEvent}
-            disabled={event.status === 'Full' && !isJoined}
+            disabled={status === 'Full' && !isJoined}
           >
-            <Text style={[
-              styles.joinButtonText,
-              isJoined && styles.leaveButtonText,
-              event.status === 'Full' && !isJoined && styles.disabledButtonText
-            ]}>
-              {isJoined 
-                ? t('events.leaveEvent', 'Leave Event') 
-                : event.status === 'Full' 
-                  ? t('events.eventFull', 'Event Full') 
-                  : t('events.joinEvent', 'Join Event')
-              }
+            <Text
+              style={[
+                styles.joinButtonText,
+                isJoined && styles.leaveButtonText,
+                status === 'Full' &&
+                  !isJoined &&
+                  styles.disabledButtonText,
+              ]}
+            >
+              {isJoined
+                ? t('events.leaveEvent', 'Leave Event')
+                : status === 'Full'
+                ? t('events.eventFull', 'Event Full')
+                : t('events.joinEvent', 'Join Event')}
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.libraryButton}
             onPress={handleViewLibrary}
           >
             <BookOpen size={20} color={Colors.primary[600]} />
-            <Text style={styles.libraryButtonText}>{t('events.viewLibrary', 'View Library')}</Text>
+            <Text style={styles.libraryButtonText}>
+              {t('events.viewLibrary', 'View Library')}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

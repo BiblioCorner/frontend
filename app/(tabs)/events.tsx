@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
 import { CalendarDays } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
@@ -6,23 +6,39 @@ import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
 import SearchBar from '@/components/SearchBar';
 import EventCard from '@/components/EventCard';
-import { events } from '@/data/events';
 import { EventType } from '@/types/event';
 import { useTranslation } from 'react-i18next';
+import { getEvents } from '@/services/event.service';
 
 export default function EventsScreen() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredEvents, setFilteredEvents] = useState(events);
+  const [filteredEvents, setFilteredEvents] = useState<EventType[]>([]);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [events, setEvents] = useState<EventType[]>([]);
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getEvents();
+        setEvents(data);
+        setFilteredEvents(data);
+      } catch (error) {
+        console.error('Error fetching libraries:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    useEffect(() => {
+      fetchEvents();
+    }, []);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
     if (text) {
       const filtered = events.filter(event => 
-        event.title.toLowerCase().includes(text.toLowerCase()) ||
-        event.libraryName.toLowerCase().includes(text.toLowerCase()) ||
-        event.category.toLowerCase().includes(text.toLowerCase())
+        event.name.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredEvents(filtered);
     } else {
@@ -35,15 +51,13 @@ export default function EventsScreen() {
     if (filter === 'all') {
       setFilteredEvents(events);
     } else if (filter === 'open') {
-      setFilteredEvents(events.filter(event => event.status === 'Open'));
+      setFilteredEvents(events.filter(event => event.end_time > new Date()));
     } else if (filter === 'today') {
       // This would normally filter by today's date
-      // For the mock data, we'll just return the first two events
-      setFilteredEvents(events.slice(0, 2));
+      setFilteredEvents(events.filter(event => new Date(event.start_time).toDateString() === new Date().toDateString()));
     } else if (filter === 'upcoming') {
       // This would normally filter by future dates
-      // For the mock data, we'll return events from index 2 onwards
-      setFilteredEvents(events.slice(2));
+      setFilteredEvents(events.filter(event => new Date(event.start_time) > new Date()));
     }
   };
 
@@ -97,7 +111,7 @@ export default function EventsScreen() {
       ) : (
         <FlatList
           data={filteredEvents}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <EventCard event={item} />
           )}

@@ -1,6 +1,7 @@
 import env from '@/config/env';
+import { LibraryType } from '@/types/library';
 
-export const getLibraries = async () => {
+export const getLibraries = async (): Promise<LibraryType[]> => {
   try {
     const response = await fetch(`${env.apiUrl}/library`);
     if (!response.ok) {
@@ -14,7 +15,7 @@ export const getLibraries = async () => {
   }
 };
 
-export const getLibraryById = async (id: string) => {
+export const getLibraryById = async (id: string): Promise<LibraryType> => {
     try {
         const response = await fetch(`${env.apiUrl}/library/${id}`);
         if (!response.ok) {
