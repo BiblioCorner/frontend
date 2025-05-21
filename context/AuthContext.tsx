@@ -43,10 +43,10 @@
 //       try {
 //         // Simulate auth check delay
 //         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
 //         // In a real app, you would get this from storage or an API
 //         const storedUser = null; // localStorage.getItem('user')
-        
+
 //         if (storedUser) {
 //           // setUser(JSON.parse(storedUser));
 //         }
@@ -66,17 +66,17 @@
 //     try {
 //       // Simulate API call
 //       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
 //       // Mock successful login - in a real app this would be an API call
 //       const newUser: User = {
 //         id: '1',
 //         email,
 //         name: 'Demo User',
 //       };
-      
+
 //       setUser(newUser);
 //       // In a real app: localStorage.setItem('user', JSON.stringify(newUser));
-      
+
 //       // Navigate to main app
 //       router.replace('/(tabs)');
 //     } catch (error) {
@@ -93,7 +93,7 @@
 //     try {
 //       // Simulate API call
 //       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
 //       // Mock successful registration - in a real app this would be an API call
 //       const newUser: User = {
 //         id: '1',
@@ -101,10 +101,10 @@
 //         phoneNumber,
 //         name: email.split('@')[0],
 //       };
-      
+
 //       setUser(newUser);
 //       // In a real app: localStorage.setItem('user', JSON.stringify(newUser));
-      
+
 //       // Navigate to main app
 //       router.replace('/(tabs)');
 //     } catch (error) {
@@ -183,9 +183,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
-  signIn: async () => {},
-  signUp: async () => {},
-  signOut: () => {},
+  signIn: async () => { },
+  signUp: async () => { },
+  signOut: () => { },
   isAuthenticated: false,
 });
 
@@ -215,65 +215,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  
- const signIn = async (email: string, password: string) => {
-  setIsLoading(true);
-  try {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || 'Échec de la connexion');
-    }
-
-    const data = await res.json();
-    const token = data.token;
-    console.log('JWT Token reçu :', token);
-    await AsyncStorage.setItem('token', token);
-    const newUser: User = {
-      id: data.userId,
-      email: email,
-    };
-    setUser(newUser);
-    router.replace('/(tabs)');
-  } catch (error) {
-    console.error('Sign in failed:', error);
-    throw error;
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  const signUp = async (userData: SignupPayload) => {
+  const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log(`${API_BASE_URL}/auth/signup`);
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Échec de la connexion');
+      }
+
+      const data = await res.json();
+      const token = data.token;
+      console.log('JWT Token reçu :', token);
+      await AsyncStorage.setItem('token', token);
+      const newUser: User = {
+        id: data.userId,
+        email: email,
+      };
+      setUser(newUser);
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Sign in failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signUp = async (userData: SignupPayload) => {
+    console.log('Début de l’inscription');
+    setIsLoading(true);
+    try {
       const res = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
+      console.log('Réponse API reçue:', res.status);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Échec de l’inscription');
-      }
+      if (!res.ok) throw new Error('Échec de l’inscription');
 
       const data = await res.json();
-      const newUser: User = {
-        id: data._id || data.id,
-        email: data.email,
-        name: `${data.first_name} ${data.last_name}`,
-      };
-
-      setUser(newUser);
       router.replace('/login');
     } catch (error) {
-      console.error('Sign up failed:', error);
+      console.error('Erreur:', error);
       throw error;
     } finally {
       setIsLoading(false);

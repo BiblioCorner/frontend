@@ -9,9 +9,9 @@ import {
   Alert,
   ScrollView,
   Image,
+  Modal,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, ChevronDown } from 'lucide-react-native';
 import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
@@ -29,6 +29,33 @@ export default function SignupScreen() {
   const [linkedin, setLinkedin] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // États pour les modals des sélecteurs
+  const [fieldModalVisible, setFieldModalVisible] = useState(false);
+  const [profileTypeModalVisible, setProfileTypeModalVisible] = useState(false);
+  const [roleModalVisible, setRoleModalVisible] = useState(false);
+
+  // Options pour les sélecteurs
+  const fieldOptions = [
+    { label: 'IT', value: 'IT' },
+    { label: 'Santé', value: 'Santé' },
+    { label: 'Éducation', value: 'Éducation' },
+  ];
+
+  const profileTypeOptions = [
+    { label: 'Étudiant', value: 'Student' },
+    { label: 'Employé', value: 'Employee' },
+    { label: 'Freelance', value: 'Freelancer' },
+    { label: 'Entrepreneur', value: 'Entrepreneur' },
+    { label: 'Sans emploi', value: 'Unemployed' },
+    { label: 'Retraité', value: 'Retired' },
+    { label: 'Autre', value: 'Other' },
+  ];
+
+  const roleOptions = [
+    { label: 'Utilisateur', value: 'User' },
+    { label: 'Administrateur', value: 'Admin' },
+  ];
 
   const { signUp } = useAuth();
 
@@ -58,6 +85,86 @@ export default function SignupScreen() {
     }
   };
 
+  // Fonction pour obtenir le libellé à partir de la valeur
+  const getLabelFromValue = (options: { label: string; value: string }[], value: string) => {
+    const option = options.find(opt => opt.value === value);
+    return option ? option.label : '';
+  };
+
+  // Composant de modal pour la sélection
+  interface SelectionModalProps {
+    visible: boolean;
+    onClose: () => void;
+    options: { label: string; value: string }[];
+    selectedValue: string;
+    onSelect: (value: string) => void;
+    title: string;
+  }
+
+  const SelectionModal: React.FC<SelectionModalProps> = ({ visible, onClose, options, selectedValue, onSelect, title }) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{title}</Text>
+          
+          <ScrollView style={styles.modalScrollView}>
+            {options.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.modalOption,
+                  selectedValue === option.value && styles.modalOptionSelected
+                ]}
+                onPress={() => {
+                  onSelect(option.value);
+                  onClose();
+                }}
+              >
+                <Text
+                  style={[
+                    styles.modalOptionText,
+                    selectedValue === option.value && styles.modalOptionTextSelected
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          
+          <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
+            <Text style={styles.modalCloseButtonText}>Fermer</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  // Composant personnalisé pour remplacer le Picker
+  interface CustomSelectProps {
+    label: string;
+    value: string;
+    options: { label: string; value: string }[];
+    onPress: () => void;
+  }
+
+  const CustomSelect: React.FC<CustomSelectProps> = ({ label, value, options, onPress }) => (
+    <>
+      <Text style={styles.label}>{label}</Text>
+      <TouchableOpacity style={styles.selectControl} onPress={onPress}>
+        <Text style={styles.selectText}>
+          {getLabelFromValue(options, value)}
+        </Text>
+        <ChevronDown size={20} color={Colors.text.secondary} />
+      </TouchableOpacity>
+    </>
+  );
+
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -79,30 +186,27 @@ export default function SignupScreen() {
       <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
       <TextInput style={styles.input} placeholder="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" />
 
-      {/* pickers à refaire style*/}
-      <Text style={styles.label}>Secteur</Text>
-      <Picker selectedValue={field} onValueChange={setField} style={styles.picker}>
-        <Picker.Item label="IT" value="IT" />
-        <Picker.Item label="Santé" value="Santé" />
-        <Picker.Item label="Éducation" value="Éducation" />
-      </Picker>
+      {/* Sélecteurs personnalisés */}
+      <CustomSelect
+        label="Secteur"
+        value={field}
+        options={fieldOptions}
+        onPress={() => setFieldModalVisible(true)}
+      />
 
-      <Text style={styles.label}>Type de profil</Text>
-      <Picker selectedValue={profileType} onValueChange={setProfileType} style={styles.picker}>
-        <Picker.Item label="Étudiant" value="Student" />
-        <Picker.Item label="Employé" value="Employee" />
-        <Picker.Item label="Freelance" value="Freelancer" />
-        <Picker.Item label="Entrepreneur" value="Entrepreneur" />
-        <Picker.Item label="Sans emploi" value="Unemployed" />
-        <Picker.Item label="Retraité" value="Retired" />
-        <Picker.Item label="Autre" value="Other" />
-      </Picker>
+      <CustomSelect
+        label="Type de profil"
+        value={profileType}
+        options={profileTypeOptions}
+        onPress={() => setProfileTypeModalVisible(true)}
+      />
 
-      <Text style={styles.label}>Rôle</Text>
-      <Picker selectedValue={role} onValueChange={setRole} style={styles.picker}>
-        <Picker.Item label="Utilisateur" value="User" />
-        <Picker.Item label="Administrateur" value="Admin" />
-      </Picker>
+      <CustomSelect
+        label="Rôle"
+        value={role}
+        options={roleOptions}
+        onPress={() => setRoleModalVisible(true)}
+      />
 
       <TextInput style={styles.input} placeholder="Lien LinkedIn (optionnel)" value={linkedin} onChangeText={setLinkedin} />
       <TextInput
@@ -131,6 +235,34 @@ export default function SignupScreen() {
           <Text style={styles.loginLinkText}>Se connecter</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modals de sélection */}
+      <SelectionModal
+        visible={fieldModalVisible}
+        onClose={() => setFieldModalVisible(false)}
+        options={fieldOptions}
+        selectedValue={field}
+        onSelect={setField}
+        title="Choisissez votre secteur"
+      />
+
+      <SelectionModal
+        visible={profileTypeModalVisible}
+        onClose={() => setProfileTypeModalVisible(false)}
+        options={profileTypeOptions}
+        selectedValue={profileType}
+        onSelect={setProfileType}
+        title="Choisissez votre type de profil"
+      />
+
+      <SelectionModal
+        visible={roleModalVisible}
+        onClose={() => setRoleModalVisible(false)}
+        options={roleOptions}
+        selectedValue={role}
+        onSelect={setRole}
+        title="Choisissez votre rôle"
+      />
     </ScrollView>
   );
 }
@@ -139,6 +271,7 @@ const styles = StyleSheet.create({
   container: {
     padding: Layout.spacing.xl,
     backgroundColor: Colors.background.primary,
+    paddingBottom: Layout.spacing.xxl,
   },
   backButton: {
     position: 'absolute',
@@ -160,8 +293,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 250,
+    height: 250,
   },
   title: {
     fontFamily: Typography.fontFamily.serif,
@@ -191,10 +324,75 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginTop: Layout.spacing.sm,
   },
-  picker: {
+  // Styles pour le sélecteur personnalisé
+  selectControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: Colors.border.light,
     borderRadius: Layout.borderRadius.lg,
+    paddingHorizontal: Layout.spacing.md,
+    paddingVertical: Layout.spacing.sm,
     marginBottom: Layout.spacing.md,
     backgroundColor: '#fff',
+    height: 48,
+  },
+  selectText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.primary,
+  },
+  // Styles pour le modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: Colors.background.primary,
+    borderTopLeftRadius: Layout.borderRadius.xl,
+    borderTopRightRadius: Layout.borderRadius.xl,
+    padding: Layout.spacing.lg,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    fontFamily: Typography.fontFamily.semiBold,
+    fontSize: Typography.fontSize.lg,
+    color: Colors.text.primary,
+    textAlign: 'center',
+    marginBottom: Layout.spacing.lg,
+  },
+  modalScrollView: {
+    marginBottom: Layout.spacing.lg,
+  },
+  modalOption: {
+    paddingVertical: Layout.spacing.md,
+    paddingHorizontal: Layout.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border.light,
+  },
+  modalOptionSelected: {
+    backgroundColor: Colors.primary[50],
+  },
+  modalOptionText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.primary,
+  },
+  modalOptionTextSelected: {
+    color: Colors.primary[600],
+    fontFamily: Typography.fontFamily.medium,
+  },
+  modalCloseButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Layout.spacing.md,
+    backgroundColor: Colors.primary[600],
+    borderRadius: Layout.borderRadius.md,
+  },
+  modalCloseButtonText: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: Typography.fontSize.md,
+    color: '#fff',
   },
   signupButton: {
     height: 54,
@@ -217,6 +415,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: Layout.spacing.xl,
   },
   loginText: {
     fontFamily: Typography.fontFamily.regular,
