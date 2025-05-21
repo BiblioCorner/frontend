@@ -1,15 +1,11 @@
 export interface EventType {
-  id: string;
-  title: string;
-  libraryId: string;
-  libraryName: string;
-  date: string;
-  time: string;
-  imageUrl: string;
+  _id: string;
+  name: string;
   description: string;
-  status: 'Open' | 'Limited' | 'Full';
-  attendees?: number;
-  maxAttendees?: number;
-  category: string;
-  location?: string;
+  date: Date;
+  start_time: Date;
+  end_time: Date;
+  library_id: string;
+  address: string;
+  register_link: string;
 }

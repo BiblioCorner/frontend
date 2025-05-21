@@ -70,7 +70,14 @@ export default {
     "addedToBookmarks": "Added to Bookmarks",
     "removedFromBookmarksMessage": "{{name}} has been removed from your bookmarks",
     "addedToBookmarksMessage": "{{name}} has been added to your bookmarks",
-    "info": "Info"
+    "info": "Info",
+    "services": "Services",
+    "accessibility": "Accessibility",
+    "upcomingEvents": "Upcoming Events",
+    "noUpcomingEvents": "No upcoming events",
+    "showAllReviews": "Show All {{count}} Reviews",
+    "call": "Call",
+    "viewMaps": "View on Maps",
   },  // Events
   "events": {
     "title": "Events",

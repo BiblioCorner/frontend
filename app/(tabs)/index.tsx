@@ -1,21 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
-import { Filter } from 'lucide-react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView } from 'react-native';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
 import SearchBar from '@/components/SearchBar';
 import LibraryCard from '@/components/LibraryCard';
-import { libraries } from '@/data/libraries';
 import { LibraryType } from '@/types/library';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
+import { getLibraries } from '@/services/library.service';
 
 export default function LibrariesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredLibraries, setFilteredLibraries] = useState(libraries);
+  const [libraries, setLibraries] = useState<LibraryType[]>([]);
+  const [filteredLibraries, setFilteredLibraries] = useState<LibraryType[]>([]);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
+
+  const fetchLibraries = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getLibraries();
+      setLibraries(data);
+      setFilteredLibraries(data);
+    } catch (error) {
+      console.error('Error fetching libraries:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLibraries();
+  }, []);
 
   useEffect(() => {
     if (searchQuery) {
@@ -27,7 +45,7 @@ export default function LibrariesScreen() {
     } else {
       setFilteredLibraries(libraries);
     }
-  }, [searchQuery]);
+  }, [searchQuery, libraries]);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -51,8 +69,8 @@ export default function LibrariesScreen() {
         const distance = calculateDistance(
           location.coords.latitude,
           location.coords.longitude,
-          library.coordinates.latitude,
-          library.coordinates.longitude
+          library.location.latitude,
+          library.location.longitude
         );
         return { ...library, distance };
       });
@@ -107,9 +125,9 @@ export default function LibrariesScreen() {
       ) : (
         <FlatList
           data={filteredLibraries}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <LibraryCard library={item} />
+            <LibraryCard key={item._id} library={item} />
           )}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}

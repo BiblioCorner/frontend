@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -28,31 +28,60 @@ import {
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
-import { libraries } from '@/data/libraries';
+import type { LibraryType } from '@/types/library';
 import { events } from '@/data/events';
 import { reviews } from '@/data/reviews';
 import ReviewItem from '@/components/ReviewItem';
 import { useTranslation } from 'react-i18next';
+import { getLibraryById } from '@/services/library.service';
+import { getEventByLibraryId } from '@/services/event.service';
+import { getReviewsByLibraryId } from '@/services/review.service';
+import { EventType } from '@/types/event';
+import { ReviewType } from '@/types/review';
 
 export default function LibraryDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
-  const library = libraries.find(lib => lib.id === id);
-  const libraryReviews = reviews.filter(review => review.libraryId === id);
-  const libraryEvents = events.filter(event => event.libraryId === id);
-  
+  const [library, setLibrary] = useState<LibraryType | null>(null);
+  const [libraryEvents, setLibraryEvents] = useState<EventType[]>([]);
+  const [libraryReviews, setLibraryReviews] = useState<ReviewType[]>([]);
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [reviewText, setReviewText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
-  
+
+  // Fetch library data by ID
+  const fetchLibraryData = async () => {
+    try {
+      console.log({ id });
+
+      const library = await getLibraryById(id as string);
+      setLibrary(library);
+      const libraryEventsData = await getEventByLibraryId(id as string);
+      setLibraryEvents(libraryEventsData);
+      const libraryReviewsData = await getReviewsByLibraryId(id as string);
+      setLibraryReviews(libraryReviewsData);
+    } catch (error) {
+      console.error('Error fetching library data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLibraryData();
+  }, [id]);
+
   if (!library) {
     return (
       <SafeAreaView style={styles.errorContainer}>
-        <Text style={styles.errorText}>{t('library.notFound', 'Library not found')}</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>{t('common.back')}</Text>
+        <Text style={styles.errorText}>
+          {t('library.notFound', 'Library not found')}
+        </Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <ArrowLeft size={24} color={Colors.primary[600]} />
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -83,10 +112,20 @@ export default function LibraryDetailScreen() {
   const handleSave = () => {
     setIsSaved(!isSaved);
     Alert.alert(
-      isSaved ? t('library.removedFromBookmarks', 'Removed from Bookmarks') : t('library.addedToBookmarks', 'Added to Bookmarks'),
-      isSaved 
-        ? t('library.removedFromBookmarksMessage', `{{name}} has been removed from your bookmarks`, { name: library.name }) 
-        : t('library.addedToBookmarksMessage', `{{name}} has been added to your bookmarks`, { name: library.name })
+      isSaved
+        ? t('library.removedFromBookmarks', 'Removed from Bookmarks')
+        : t('library.addedToBookmarks', 'Added to Bookmarks'),
+      isSaved
+        ? t(
+            'library.removedFromBookmarksMessage',
+            `{{name}} has been removed from your bookmarks`,
+            { name: library.name }
+          )
+        : t(
+            'library.addedToBookmarksMessage',
+            `{{name}} has been added to your bookmarks`,
+            { name: library.name }
+          )
     );
   };
 
@@ -94,8 +133,8 @@ export default function LibraryDetailScreen() {
     setIsLiked(!isLiked);
     Alert.alert(
       isLiked ? 'Removed Like' : 'Added Like',
-      isLiked 
-        ? `You no longer like ${library.name}` 
+      isLiked
+        ? `You no longer like ${library.name}`
         : `You now like ${library.name}`
     );
   };
@@ -109,13 +148,15 @@ export default function LibraryDetailScreen() {
     }
   };
 
-  const displayedReviews = showAllReviews ? libraryReviews : libraryReviews.slice(0, 2);
+  const displayedReviews = showAllReviews
+    ? libraryReviews
+    : libraryReviews.slice(0, 2);
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <ScrollView
+          {/* <ScrollView
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
@@ -128,8 +169,8 @@ export default function LibraryDetailScreen() {
                 resizeMode="cover"
               />
             ))}
-          </ScrollView>
-          
+          </ScrollView> */}
+
           <SafeAreaView style={styles.header}>
             <TouchableOpacity
               style={styles.backButton}
@@ -137,7 +178,7 @@ export default function LibraryDetailScreen() {
             >
               <ArrowLeft size={24} color={Colors.white} />
             </TouchableOpacity>
-            
+
             <View style={styles.headerActions}>
               <TouchableOpacity
                 style={styles.actionButton}
@@ -145,7 +186,7 @@ export default function LibraryDetailScreen() {
               >
                 <Share2 size={24} color={Colors.white} />
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={handleSave}
@@ -159,37 +200,53 @@ export default function LibraryDetailScreen() {
             </View>
           </SafeAreaView>
         </View>
-        
+
         <View style={styles.contentContainer}>
           <View style={styles.mainInfo}>
             <Text style={styles.name}>{library.name}</Text>
-            
+
             <View style={styles.ratingContainer}>
-              <Star size={16} color={Colors.accent[500]} fill={Colors.accent[500]} />
+              <Star
+                size={16}
+                color={Colors.accent[500]}
+                fill={Colors.accent[500]}
+              />
               <Text style={styles.rating}>
-                {library.rating.toFixed(1)} ({library.reviewCount} reviews)
+                {library.rating.toFixed(1)} ({reviews.length}{' '}
+                {t('library.reviews').toLowerCase()})
               </Text>
             </View>
-            
-            <TouchableOpacity style={styles.addressContainer} onPress={handleOpenMap}>
+
+            <TouchableOpacity
+              style={styles.addressContainer}
+              onPress={handleOpenMap}
+            >
               <MapPin size={16} color={Colors.gray[500]} style={styles.icon} />
               <Text style={styles.address}>{library.address}</Text>
             </TouchableOpacity>
-            
             <View style={styles.hoursContainer}>
               <Clock size={16} color={Colors.gray[500]} style={styles.icon} />
-              <Text style={styles.hours}>
-                {library.isOpen ? (
-                  <Text style={styles.openStatusOpen}>Open</Text>
+              <View>
+                {library.opening_hours && library.opening_hours.length > 0 ? (
+                  <View>
+                    {library.opening_hours.map((hours, index) => (
+                      <Text key={index} style={styles.hours}>
+                        {hours.day}:{' '}
+                        {hours.is_open === 'Ouvert'
+                          ? `${hours.open_time} - ${hours.close_time}`
+                          : t('library.closed')}
+                      </Text>
+                    ))}
+                  </View>
                 ) : (
-                  <Text style={styles.openStatusClosed}>Closed</Text>
+                  <Text style={styles.hours}>
+                    {t('library.noHoursInfo', 'No hours information available')}
+                  </Text>
                 )}
-                {' • '}
-                {library.openingTime} - {library.closingTime}
-              </Text>
+              </View>
             </View>
           </View>
-          
+
           <View style={styles.actionButtonsContainer}>
             {library.phone && (
               <TouchableOpacity
@@ -197,35 +254,36 @@ export default function LibraryDetailScreen() {
                 onPress={handleCall}
               >
                 <Phone size={20} color={Colors.primary[600]} />
-                <Text style={styles.actionButtonText}>Call</Text>
+                <Text style={styles.actionButtonText}>{t('library.call')}</Text>
               </TouchableOpacity>
             )}
-            
+
             <TouchableOpacity
               style={styles.actionButtonLarge}
               onPress={handleOpenMap}
             >
               <MapPin size={20} color={Colors.primary[600]} />
-              <Text style={styles.actionButtonText}>View on Maps</Text>
+              <Text style={styles.actionButtonText}>
+                {t('library.viewMaps')}
+              </Text>
             </TouchableOpacity>
-            
+
             {library.website && (
               <TouchableOpacity
                 style={styles.actionButtonLarge}
                 onPress={handleVisitWebsite}
               >
                 <Globe size={20} color={Colors.primary[600]} />
-                <Text style={styles.actionButtonText}>Website</Text>
+                <Text style={styles.actionButtonText}>
+                  {t('library.website')}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
-          
+
           <View style={styles.tabsContainer}>
             <TouchableOpacity
-              style={[
-                styles.tab,
-                activeTab === 'info' && styles.activeTab,
-              ]}
+              style={[styles.tab, activeTab === 'info' && styles.activeTab]}
               onPress={() => setActiveTab('info')}
             >
               <Text
@@ -237,12 +295,9 @@ export default function LibraryDetailScreen() {
                 {t('library.info', 'Info')}
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
-              style={[
-                styles.tab,
-                activeTab === 'events' && styles.activeTab,
-              ]}
+              style={[styles.tab, activeTab === 'events' && styles.activeTab]}
               onPress={() => setActiveTab('events')}
             >
               <Text
@@ -256,10 +311,7 @@ export default function LibraryDetailScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.tab,
-                activeTab === 'reviews' && styles.activeTab,
-              ]}
+              style={[styles.tab, activeTab === 'reviews' && styles.activeTab]}
               onPress={() => setActiveTab('reviews')}
             >
               <Text
@@ -272,33 +324,35 @@ export default function LibraryDetailScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-          
+
           {activeTab === 'info' && (
             <View style={styles.infoContainer}>
-              <View style={styles.descriptionContainer}>
-                <Text style={styles.sectionTitle}>About</Text>
-                <Text style={styles.description}>{library.description}</Text>
+              <View>
+                <Text style={styles.sectionTitle}>
+                  {t('library.about', 'About')}
+                </Text>
+                <Text style={styles.description}>{library.name}</Text>
               </View>
-              
+
               <View style={styles.servicesContainer}>
-                <Text style={styles.sectionTitle}>Services</Text>
+                <Text style={styles.sectionTitle}>
+                  {t('library.services', 'Services')}
+                </Text>
                 <View style={styles.servicesList}>
-                  {library.services.map((service, index) => (
-                    <View key={index} style={styles.serviceItem}>
-                      <Text style={styles.serviceText}>{service}</Text>
-                    </View>
-                  ))}
+                  <View style={styles.serviceItem}>
+                    <Text style={styles.serviceText}>{library.services}</Text>
+                  </View>
                 </View>
               </View>
-              
+
               <View style={styles.tagsContainer}>
-                <Text style={styles.sectionTitle}>Tags</Text>
+                <Text style={styles.sectionTitle}>
+                  {t('library.accessibility', 'Accessibility')}
+                </Text>
                 <View style={styles.tagsList}>
-                  {library.tags.map((tag, index) => (
-                    <View key={index} style={styles.tagItem}>
-                      <Text style={styles.tagText}>{tag}</Text>
-                    </View>
-                  ))}
+                  <View style={styles.tagItem}>
+                    <Text style={styles.tagText}>{library.accessibility}</Text>
+                  </View>
                 </View>
               </View>
             </View>
@@ -306,50 +360,56 @@ export default function LibraryDetailScreen() {
 
           {activeTab === 'events' && (
             <View style={styles.eventsContainer}>
-              <Text style={styles.sectionTitle}>Upcoming Events</Text>
+              <Text style={styles.sectionTitle}>
+                {t('library.upcomingEvents', 'Upcoming Events')}
+              </Text>
               {libraryEvents.length > 0 ? (
                 libraryEvents.map((event) => (
                   <TouchableOpacity
-                    key={event.id}
+                    key={event._id}
                     style={styles.eventCard}
-                    onPress={() => router.push(`/event/${event.id}`)}
+                    onPress={() => router.push(`/event/${event._id}`)}
                   >
-                    <Image
-                      source={{ uri: event.imageUrl }}
-                      style={styles.eventImage}
-                      resizeMode="cover"
-                    />
+                 
                     <View style={styles.eventInfo}>
-                      <Text style={styles.eventTitle}>{event.title}</Text>
+                      <Text style={styles.eventTitle}>{event.name}</Text>
                       <View style={styles.eventDetails}>
-                        <Calendar size={14} color={Colors.gray[500]} style={styles.icon} />
-                        <Text style={styles.eventDate}>{event.date} • {event.time}</Text>
+                        <Calendar
+                          size={14}
+                          color={Colors.gray[500]}
+                          style={styles.icon}
+                        />
+                        <Text style={styles.eventDate}>
+                          {new Date(event.date).toLocaleDateString()} • {new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Text>
                       </View>
-                      <View style={[
-                        styles.eventStatus,
-                        { backgroundColor: getStatusColor(event.status) }
-                      ]}>
-                        <Text style={styles.eventStatusText}>{event.status}</Text>
-                      </View>
+                     
                     </View>
                   </TouchableOpacity>
                 ))
               ) : (
-                <Text style={styles.noEventsText}>No upcoming events</Text>
+                <Text style={styles.noEventsText}>
+                  {t('library.noUpcomingEvents', 'No upcoming events')}
+                </Text>
               )}
             </View>
           )}
-          
+
           {activeTab === 'reviews' && (
             <View style={styles.reviewsContainer}>
               <View style={styles.reviewsHeader}>
-                <Text style={styles.sectionTitle}>Reviews</Text>
+                <Text style={styles.sectionTitle}>
+                  {t('library.reviews', 'Reviews')}
+                </Text>
               </View>
-              
+
               <View style={styles.reviewInputContainer}>
                 <TextInput
                   style={styles.reviewInput}
-                  placeholder="Write your review here..."
+                  placeholder={t(
+                    'library.writeReview',
+                    'Write your review here...'
+                  )}
                   placeholderTextColor={Colors.gray[400]}
                   value={reviewText}
                   onChangeText={setReviewText}
@@ -362,22 +422,25 @@ export default function LibraryDetailScreen() {
                   <Send size={20} color={Colors.white} />
                 </TouchableOpacity>
               </View>
-              
-              {displayedReviews.map(review => (
+
+              {displayedReviews.map((review) => (
                 <ReviewItem
-                  key={review.id}
+                  key={review._id}
                   review={review}
                   onReport={() => {}}
                 />
               ))}
-              
+
               {libraryReviews.length > 2 && !showAllReviews && (
                 <TouchableOpacity
                   style={styles.showMoreButton}
                   onPress={() => setShowAllReviews(true)}
                 >
                   <Text style={styles.showMoreButtonText}>
-                    Show All {libraryReviews.length} Reviews
+                    {t('library.showAllReviews', {
+                      defaultValue: 'Show All {{count}} Reviews',
+                      count: libraryReviews.length,
+                    })}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -558,7 +621,6 @@ const styles = StyleSheet.create({
   infoContainer: {
     gap: Layout.spacing.xl,
   },
-  descriptionContainer: {},
   sectionTitle: {
     fontFamily: Typography.fontFamily.semiBold,
     fontSize: Typography.fontSize.lg,

@@ -1,7 +1,7 @@
 import { EventType } from "@/types/event";
 
 // Mock events data
-export const events: EventType[] = [
+export const events = [
   {
     id: '1',
     title: 'Meet the Author: Marie Dupont',

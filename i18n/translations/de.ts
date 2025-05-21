@@ -70,7 +70,14 @@ export default {
     "addedToBookmarks": "Zu Lesezeichen hinzugefügt",
     "removedFromBookmarksMessage": "{{name}} wurde aus deinen Lesezeichen entfernt",
     "addedToBookmarksMessage": "{{name}} wurde zu deinen Lesezeichen hinzugefügt",
-    "info": "Info"
+    "info": "Info",
+    "services": "Dienstleistungen",
+    "accessibility": "Barrierefreiheit",
+    "upcomingEvents": "Kommende Veranstaltungen",
+    "noUpcomingEvents": "Keine kommenden Veranstaltungen",
+    "showAllReviews": "Alle {{count}} Bewertungen anzeigen",
+    "call": "Anrufen",
+    "viewMaps": "Auf Karte anzeigen",
   },  // Events
   "events": {
     "title": "Veranstaltungen",

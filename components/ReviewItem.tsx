@@ -23,37 +23,42 @@ export default function ReviewItem({ review, onReport }: ReviewItemProps) {
     ));
   };
 
+  console.log({review});
+  
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          <Image 
-            source={{ uri: review.userAvatar }} 
+          {/* <Image 
+            source={{ uri: review.user_id }} 
             style={styles.avatar}
-          />
+          /> */}
           <View>
-            <Text style={styles.username}>{review.userName}</Text>
+            <Text style={styles.username}>John Doe</Text>
             <View style={styles.starsRow}>
-              {renderStars(review.rating)}
+              {review.likes_count > 0 && (
+                <Text>{review.likes_count} Likes</Text>
+              )}
             </View>
           </View>
         </View>
         
         <TouchableOpacity 
           style={styles.moreButton}
-          onPress={() => onReport(review.id)}
+          onPress={() => onReport(review._id)}
         >
           <MoreHorizontal size={20} color={Colors.gray[400]} />
         </TouchableOpacity>
       </View>
       
-      <Text style={styles.date}>{review.date}</Text>
+      <Text style={styles.date}>{review.created_at}</Text>
       <Text style={styles.content}>{review.content}</Text>
       
       <View style={styles.actions}>
         <TouchableOpacity 
           style={styles.reportButton}
-          onPress={() => onReport(review.id)}
+          onPress={() => onReport(review._id)}
         >
           <Flag size={14} color={Colors.gray[500]} />
           <Text style={styles.reportText}>Report</Text>
