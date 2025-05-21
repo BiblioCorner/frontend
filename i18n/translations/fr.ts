@@ -70,7 +70,14 @@ export default {
     "addedToBookmarks": "Ajoutée aux favoris",
     "removedFromBookmarksMessage": "{{name}} a été retirée de vos favoris",
     "addedToBookmarksMessage": "{{name}} a été ajoutée à vos favoris",
-    "info": "Infos"
+    "info": "Infos",
+    "services": "Services",
+    "accessibility": "Accessibilité",
+    "upcomingEvents": "Événements à venir",
+    "noUpcomingEvents": "Aucun événement à venir",
+    "showAllReviews": "Afficher les {{count}} avis",
+    "call": "Appeler",
+    "viewMaps": "Voir sur la carte",
   },  // Events
   "events": {
     "title": "Événements",
