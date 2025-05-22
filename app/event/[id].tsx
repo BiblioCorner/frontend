@@ -29,19 +29,37 @@ import { getLibraryById } from '@/services/library.service';
 import { EventType } from '@/types/event';
 import { LibraryType } from '@/types/library';
 
+const EVENT_IMAGES = [
+  "https://images.pexels.com/photos/1587927/pexels-photo-1587927.jpeg",
+  "https://images.pexels.com/photos/1038916/pexels-photo-1038916.jpeg",
+  "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg",
+  "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg",
+  "https://images.pexels.com/photos/7092613/pexels-photo-7092613.jpeg",
+  "https://images.pexels.com/photos/8534187/pexels-photo-8534187.jpeg",
+  "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg",
+  "https://images.pexels.com/photos/7681731/pexels-photo-7681731.jpeg",
+  "https://images.pexels.com/photos/2925304/pexels-photo-2925304.jpeg"
+];
+
 export default function EventDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const [event, setEvent] = useState<EventType>();
   const [library, setLibrary] = useState<LibraryType>();
-
   const [isJoined, setIsJoined] = useState(false);
   const [status, setStatus] = useState<'Open' | 'Limited' | 'Full'>('Open');
+
+  const getImageIndex = (eventId: string) => {
+    let sum = 0;
+    for (let i = 0; i < eventId.length; i++) {
+      sum += eventId.charCodeAt(i) * (i + 1);
+    }
+    return sum % EVENT_IMAGES.length;
+  };
+
   const fetchEvent = async () => {
     try {
       const data = await getEventById(id as string);
-      console.log({ data });
-
       setEvent(data);
       setLibrary(data.library_id);
 
@@ -49,9 +67,9 @@ export default function EventDetailScreen() {
       const end = new Date(data.end_time);
       const now = new Date();
 
-      if (start > now && now < end) {
+      if (start > now) {
         setStatus('Open');
-      } else if (end < now) {
+      } else if (now > end) {
         setStatus('Full');
       } else {
         setStatus('Limited');
@@ -60,6 +78,7 @@ export default function EventDetailScreen() {
       console.error('Error fetching event:', error);
     }
   };
+
   useEffect(() => {
     fetchEvent();
   }, [id]);
@@ -79,19 +98,6 @@ export default function EventDetailScreen() {
       </SafeAreaView>
     );
   }
-
-  const LIBRARY_IMAGES = [
-    "https://images.pexels.com/photos/2041556/pexels-photo-2041556.jpeg",
-    "https://images.pexels.com/photos/159775/library-la-trobe-study-students-159775.jpeg",
-    "https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg",
-    "https://images.pexels.com/photos/1290141/pexels-photo-1290141.jpeg",
-    "https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg",
-  ];
-
-  const getLibraryImage = (libraryId: string) => {
-    const index = parseInt(libraryId) % LIBRARY_IMAGES.length; // Permet de boucler sur les 5 images
-    return LIBRARY_IMAGES[index];
-  };
 
   const handleJoinEvent = () => {
     if (status === 'Full') {
@@ -160,12 +166,11 @@ export default function EventDetailScreen() {
   };
 
   return (
-
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: "https://images.pexels.com/photos/7681731/pexels-photo-7681731.jpeg" }}
+            source={{ uri: EVENT_IMAGES[getImageIndex(event._id)] }}
             style={styles.image}
             resizeMode="cover"
           />
@@ -186,7 +191,6 @@ export default function EventDetailScreen() {
 
         <View style={styles.contentContainer}>
           <View style={styles.statusContainer}>
-
             <View
               style={[
                 styles.statusBadge,
@@ -223,7 +227,13 @@ export default function EventDetailScreen() {
                 color={Colors.primary[600]}
                 style={styles.infoIcon}
               />
-              <Text style={styles.infoText}>{event.date.toString()}</Text>
+              <Text style={styles.infoText}>
+                {new Date(event.start_time).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+              </Text>
             </View>
 
             <View style={styles.infoItem}>
@@ -233,7 +243,13 @@ export default function EventDetailScreen() {
                 style={styles.infoIcon}
               />
               <Text style={styles.infoText}>
-                {new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(event.start_time).toLocaleTimeString('fr-FR', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })} - {new Date(event.end_time).toLocaleTimeString('fr-FR', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
               </Text>
             </View>
 
@@ -269,9 +285,7 @@ export default function EventDetailScreen() {
               style={[
                 styles.joinButtonText,
                 isJoined && styles.leaveButtonText,
-                status === 'Full' &&
-                !isJoined &&
-                styles.disabledButtonText,
+                status === 'Full' && !isJoined && styles.disabledButtonText,
               ]}
             >
               {isJoined

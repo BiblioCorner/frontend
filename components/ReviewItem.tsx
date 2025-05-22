@@ -25,15 +25,46 @@ export default function ReviewItem({ review, onReport }: ReviewItemProps) {
 
   console.log({review});
   
+  const reviewImages = [
+    "https://images.pexels.com/photos/1587927/pexels-photo-1587927.jpeg", 
+    "https://images.pexels.com/photos/1038916/pexels-photo-1038916.jpeg",
+    "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg", 
+    "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg",
+    "https://images.pexels.com/photos/7092613/pexels-photo-7092613.jpeg",
+    "https://images.pexels.com/photos/8534187/pexels-photo-8534187.jpeg",
+    "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg",
+    "https://images.pexels.com/photos/7681731/pexels-photo-7681731.jpeg",
+    "https://images.pexels.com/photos/2925304/pexels-photo-2925304.jpeg",
+    "https://images.pexels.com/photos/1587927/pexels-photo-1587927.jpeg"
+    
+  ];
+
+
+  const getImageIndex = (id: string, index?: number) => {
+    if (typeof index !== 'undefined') {
+      return index % reviewImages.length;
+    }
+    
+    const lastChars = id.slice(-3); 
+    let hash = 0;
+    for (let i = 0; i < lastChars.length; i++) {
+      hash += lastChars.charCodeAt(i) * (i + 1);
+    }
+    return hash % reviewImages.length;
+  };
+
+
+  
+  const imageUrl = reviewImages[getImageIndex(review._id)];
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          {/* <Image 
-            source={{ uri: review.user_id }} 
+          {<Image 
+            source={{ uri: imageUrl }} 
             style={styles.avatar}
-          /> */}
+          /> }
           <View>
             <Text style={styles.username}>John Doe</Text>
             <View style={styles.starsRow}>

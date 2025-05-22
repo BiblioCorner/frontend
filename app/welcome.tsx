@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 250,
+    height: 250,
   },
   title: {
     fontFamily: Typography.fontFamily.serif,

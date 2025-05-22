@@ -52,7 +52,23 @@ export default function LibraryDetailScreen() {
   const [reviewText, setReviewText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
 
-  // Fetch library data by ID
+  const libraryImages = [
+    "https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg",
+    "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg",
+    "https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg",
+    "https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg",
+    "https://images.pexels.com/photos/694740/pexels-photo-694740.jpeg"
+  ];
+
+  const getImageForLibrary = (libraryId: string) => {
+    const lastChars = libraryId.slice(-3);
+    let hash = 0;
+    for (let i = 0; i < lastChars.length; i++) {
+      hash += lastChars.charCodeAt(i) * (i + 1);
+    }
+    return libraryImages[hash % libraryImages.length];
+  };
+
   const fetchLibraryData = async () => {
     try {
       console.log({ id });
@@ -140,65 +156,46 @@ export default function LibraryDetailScreen() {
     );
   };
 
-  // const handleSubmitReview = () => {
-  //   if (reviewText.trim().length > 0) {
-  //     Alert.alert('Review Submitted', 'Thank you for your review!');
-  //     setReviewText('');
-  //   } else {
-  //     Alert.alert('Error', 'Please write a review before submitting');
-  //   }
-  // };
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
-
-//   const handleSubmitReview = async () => {
-//   if (reviewText.trim().length === 0) {
-//     Alert.alert('Error', 'Please write a review before submitting');
-//     return;
-//   }
-
-//   try {
-//     const token = "TON_TOKEN_JWT_ICI"; 
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-
-const handleSubmitReview = async () => {
-  if (reviewText.trim().length === 0) {
-    Alert.alert('Erreur', 'Veuillez écrire un commentaire avant de l’envoyer');
-    return;
-  }
-
-  try {
-    const token = await AsyncStorage.getItem('token');
-
-    if (!token) {
-      Alert.alert('Erreur', 'Utilisateur non authentifié');
+  const handleSubmitReview = async () => {
+    if (reviewText.trim().length === 0) {
+      Alert.alert('Erreur', 'Veuillez écrire un commentaire avant de l\'envoyer');
       return;
     }
-  console.log("Library ID envoyé :", id);
-    const res = await fetch(`${API_BASE_URL}/review/${library.name}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ 
-        content: reviewText,
-     }),
-    });
 
-    const data = await res.json(); 
+    try {
+      const token = await AsyncStorage.getItem('token');
 
-    if (res.ok) {
-      Alert.alert('Commentaire envoyé', 'Merci pour votre avis !');
-      setReviewText('');
-    } else {
-      Alert.alert('Erreur', data.message || 'Échec de l\'envoi du commentaire');
+      if (!token) {
+        Alert.alert('Erreur', 'Utilisateur non authentifié');
+        return;
+      }
+      console.log("Library ID envoyé :", id);
+      const res = await fetch(`${API_BASE_URL}/review/${library.name}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          content: reviewText,
+        }),
+      });
+
+      const data = await res.json(); 
+
+      if (res.ok) {
+        Alert.alert('Commentaire envoyé', 'Merci pour votre avis !');
+        setReviewText('');
+      } else {
+        Alert.alert('Erreur', data.message || 'Échec de l\'envoi du commentaire');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'envoi');
     }
-  } catch (error) {
-    console.error(error);
-    Alert.alert('Erreur', 'Une erreur est survenue lors de l\'envoi');
-  }
-};
+  };
 
   const displayedReviews = showAllReviews
     ? libraryReviews
@@ -208,17 +205,17 @@ const handleSubmitReview = async () => {
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          {<ScrollView
+          <ScrollView
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
           >
-          <Image
-  source={{ uri: "https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg" }}
-  style={styles.image}
-  resizeMode="cover"
-/>
-          </ScrollView>}
+            <Image
+              source={{ uri: getImageForLibrary(library._id) }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </ScrollView>
 
           <SafeAreaView style={styles.header}>
             <TouchableOpacity
@@ -419,7 +416,6 @@ const handleSubmitReview = async () => {
                     style={styles.eventCard}
                     onPress={() => router.push(`/event/${event._id}`)}
                   >
-                 
                     <View style={styles.eventInfo}>
                       <Text style={styles.eventTitle}>{event.name}</Text>
                       <View style={styles.eventDetails}>
@@ -432,7 +428,6 @@ const handleSubmitReview = async () => {
                           {new Date(event.date).toLocaleDateString()} • {new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </Text>
                       </View>
-                     
                     </View>
                   </TouchableOpacity>
                 ))

@@ -8,21 +8,42 @@ import styles from './LibraryCard.styles';
 
 interface LibraryCardProps {
   library: LibraryType;
+  index?: number; 
 }
 
-export default function LibraryCard({ library }: LibraryCardProps) {
-  console.log({library});
+export default function LibraryCard({ library, index }: LibraryCardProps) {
 
-  console.log('Library:', library._id, library.name);
-  
+  const libraryImages = [
+    "https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg",
+    "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg",
+    "https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg",
+    "https://images.pexels.com/photos/2041540/pexels-photo-2041540.jpeg",
+    "https://images.pexels.com/photos/694740/pexels-photo-694740.jpeg"
+  ];
+
+  const getImageIndex = (id: string, index?: number) => {
+    if (typeof index !== 'undefined') {
+      return index % libraryImages.length;
+    }
+    
+    const lastChars = id.slice(-3); 
+    let hash = 0;
+    for (let i = 0; i < lastChars.length; i++) {
+      hash += lastChars.charCodeAt(i) * (i + 1);
+    }
+    return hash % libraryImages.length;
+  };
+
+  const imageUrl = libraryImages[getImageIndex(library._id, index)];
+
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={() => router.push(`/library/${library._id}`)}
       activeOpacity={0.7}
     >
-     <Image
-        source={{ uri: "https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg" }}
+      <Image
+        source={{ uri: imageUrl }}
         style={styles.image}
         resizeMode="cover"
       />
@@ -38,34 +59,30 @@ export default function LibraryCard({ library }: LibraryCardProps) {
             <Text style={styles.rating}>{library.rating.toFixed(1)}</Text>
           </View>
         </View>
-
+        
         <View style={styles.infoRow}>
           <MapPin size={14} color={Colors.gray[500]} />
           <Text style={styles.infoText} numberOfLines={1}>
             {library.address}
           </Text>
         </View>
-
+        
         <View style={styles.infoRow}>
           <Clock size={14} color={Colors.gray[500]} />
           <Text style={styles.infoText}>
-            {/* Show open/closed status for today if available */}
             {library.opening_hours && library.opening_hours.length > 0
               ? (() => {
                   const today = new Date().toLocaleDateString('fr-FR', {
                     weekday: 'long',
                   });
-
                   const todayHours = library.opening_hours.find(
                     (h) => h.day.toLowerCase() === today.toLowerCase()
                   );
-
                   if (todayHours) {
                     return `${
                       todayHours.is_open === 'Ouvert' ? 'Open now' : 'Closed'
                     } • Closes ${todayHours.close_time}`;
                   }
-                  // If no hours for today, show the next available hours
                   const nextOpen = library.opening_hours.find((h) => {
                     return h.is_open === 'Ouvert';
                   });
@@ -77,7 +94,7 @@ export default function LibraryCard({ library }: LibraryCardProps) {
               : 'No hours info'}
           </Text>
         </View>
-
+        
         <View style={styles.tagsContainer}>
           <View style={styles.tag}>
             <Text style={styles.tagText}>{library.services}</Text>

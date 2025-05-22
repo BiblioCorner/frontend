@@ -8,12 +8,47 @@ import styles from './EvenCard.styles';
 
 interface EventCardProps {
   event: EventType;
+  index?: number; 
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, index }: EventCardProps) {
+
+  const eventImages = [
+    "https://images.pexels.com/photos/1587927/pexels-photo-1587927.jpeg", 
+    "https://images.pexels.com/photos/1038916/pexels-photo-1038916.jpeg",
+    "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg", 
+    "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg",
+    "https://images.pexels.com/photos/7092613/pexels-photo-7092613.jpeg",
+    "https://images.pexels.com/photos/8534187/pexels-photo-8534187.jpeg",
+    "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg",
+    "https://images.pexels.com/photos/7681731/pexels-photo-7681731.jpeg",
+    "https://images.pexels.com/photos/2925304/pexels-photo-2925304.jpeg",
+    "https://images.pexels.com/photos/1587927/pexels-photo-1587927.jpeg"
+    
+  ];
+
+ 
+  const getImageIndex = (id: string, index?: number) => {
+    if (typeof index !== 'undefined') {
+      return index % eventImages.length;
+    }
+    
+    const lastChars = id.slice(-3); 
+    let hash = 0;
+    for (let i = 0; i < lastChars.length; i++) {
+      hash += lastChars.charCodeAt(i) * (i + 1);
+    }
+    return hash % eventImages.length;
+  };
+
+
+  
+  const imageUrl = eventImages[getImageIndex(event._id, index)];
+
+
   const start = new Date(event.start_time);
   const end = new Date(event.end_time);
-  const now = new Date();  
+  const now = new Date();
 
   let status: 'Open' | 'Limited' | 'Full';
   if (start > now && now < end) {
@@ -23,12 +58,18 @@ export default function EventCard({ event }: EventCardProps) {
   } else {
     status = 'Limited';
   }
+
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={() => router.push(`/event/${event._id}`)}
       activeOpacity={0.7}
     >
+      <Image
+        source={{ uri: imageUrl }}
+        style={styles.image}
+        resizeMode="cover"
+      />
       <View style={styles.content}>
         <View style={styles.libraryRow}>
           <Text style={styles.libraryName}>{event.name}</Text>
@@ -54,13 +95,11 @@ export default function EventCard({ event }: EventCardProps) {
             />
             <Text style={styles.infoText}>{start.toLocaleDateString()}</Text>
           </View>
-
           <View style={styles.infoRow}>
             <Clock size={14} color={Colors.gray[500]} style={styles.infoIcon} />
             <Text style={styles.infoText}>{start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </View>
         </View>
-
         <View style={styles.footer}>
           <TouchableOpacity
             style={[
