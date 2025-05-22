@@ -46,10 +46,6 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          {/* <Text style={styles.headerTitle}>{t('profile.title', 'Profile')}</Text> */}
-          <Text style={styles.userName}>
-  {(user?.first_name || '') + ' ' + (user?.last_name || '') || 'User'}
-</Text>
           <TouchableOpacity style={styles.settingsButton}>
             <Settings size={24} color={Colors.text.primary} />
           </TouchableOpacity>
@@ -65,9 +61,12 @@ export default function ProfileScreen() {
               <Edit size={16} color={Colors.white} />
             </TouchableOpacity>
           </View>
+          <View style={styles.nameRow}>
+            <Text style={styles.userName}>{user?.first_name || 'User'}</Text>
+            <Text style={styles.userName}>{' ' + (user?.last_name || '')}</Text>
+          </View>
 
-          <Text style={styles.userName}>{user?.first_name || 'User'}</Text>
-          <Text style={styles.userName}>{user?.last_name || 'User'}</Text>
+
           <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
 
           <TouchableOpacity style={styles.editProfileButton}>
@@ -107,7 +106,7 @@ export default function ProfileScreen() {
             <UserIcon size={20} color={Colors.primary[600]} style={styles.menuIcon} />
             <Text style={styles.menuText}>{t('profile.accountSettings', 'Account Settings')}</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.menuItem} onPress={() => setLanguageSelectorVisible(true)}>
             <Globe size={20} color={Colors.primary[600]} style={styles.menuIcon} />
             <Text style={styles.menuText}>{t('profile.language')}</Text>
@@ -116,7 +115,7 @@ export default function ProfileScreen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.menuItem, styles.logoutItem]}
             onPress={handleSignOut}
           >
@@ -125,8 +124,8 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      
-      <LanguageSelector 
+
+      <LanguageSelector
         visible={languageSelectorVisible}
         onClose={() => setLanguageSelectorVisible(false)}
       />
@@ -177,6 +176,14 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.primary[100],
   },
+
+  nameRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.xs,
+  },
+
   editButton: {
     position: 'absolute',
     bottom: 0,
