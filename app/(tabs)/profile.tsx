@@ -114,6 +114,33 @@ export default function ProfileScreen() {
           </View>
 
           <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
+          {user?.field && (
+            <Text style={styles.userDetail}>
+              Domaine : <Text style={styles.userDetailValue}>{user.field}</Text>
+            </Text>
+          )}
+          {user?.profile_type && (
+            <Text style={styles.userDetail}>
+              Type de profil : <Text style={styles.userDetailValue}>{user.profile_type}</Text>
+            </Text>
+          )}
+          {user?.role && (
+            <Text style={styles.userDetail}>
+              Rôle : <Text style={styles.userDetailValue}>{user.role}</Text>
+            </Text>
+          )}
+          {user?.linkedin && (
+            <Text style={styles.userDetail}>
+              LinkedIn : <Text style={[styles.userDetailValue, { color: Colors.primary[600] }]}>
+                {user.linkedin}
+              </Text>
+            </Text>
+          )}
+          {user?.user_description && (
+            <Text style={styles.userDetail}>
+              À propos : <Text style={styles.userDetailValue}>{user.user_description}</Text>
+            </Text>
+          )}
 
           <TouchableOpacity style={styles.editProfileButton}>
             <Text style={styles.editProfileButtonText}>{t('profile.editProfile')}</Text>
@@ -348,6 +375,20 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     marginBottom: Layout.spacing.md,
   },
+  userDetail: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    marginBottom: 6,
+    textAlign: 'center',
+    paddingHorizontal: Layout.spacing.md,
+  },
+
+  userDetailValue: {
+    fontFamily: Typography.fontFamily.regular,
+    color: Colors.text.primary,
+  },
+
 });
 
 
