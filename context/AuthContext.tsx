@@ -5,7 +5,6 @@ import { router } from 'expo-router';
 interface User {
   id: string;
   email: string;
-  // name?: string;
   first_name?: string;
   last_name?: string;
   field?: string;
@@ -14,6 +13,7 @@ interface User {
   linkedin?: string;
   user_description?: string;
   savedLibraries?: string[];
+  avatar?: string;
 }
 
 

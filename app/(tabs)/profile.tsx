@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,16 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { LogOut, Settings, Bookmark, Star, CreditCard as Edit, User as UserIcon, Globe } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  LogOut,
+  Settings,
+  Bookmark,
+  Star,
+  CreditCard as Edit,
+  User as UserIcon,
+  Globe,
+} from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Typography from '@/constants/Typography';
 import Layout from '@/constants/Layout';
@@ -17,29 +26,62 @@ import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { useLanguage, LANGUAGES } from '@/context/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
   const { language } = useLanguage();
   const [languageSelectorVisible, setLanguageSelectorVisible] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  const loadSavedAvatar = async () => {
+    const savedUri = await AsyncStorage.getItem('userAvatar');
+    if (savedUri) {
+      setProfileImage(savedUri);
+    } else {
+      setProfileImage(user?.avatar || null);
+    }
+  };
+
+  useEffect(() => {
+    loadSavedAvatar();
+  }, []);
+
+  const saveAvatarLocally = async (uri: string) => {
+    try {
+      await AsyncStorage.setItem('userAvatar', uri);
+    } catch (e) {
+      console.error('Error saving avatar', e);
+    }
+  };
 
   const handleSignOut = () => {
-    Alert.alert(
-      t('common.logout'),
-      t('profile.logoutConfirmation'),
-      [
-        {
-          text: t('common.cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('common.logout'),
-          style: 'destructive',
-          onPress: signOut,
-        },
-      ],
-    );
+    Alert.alert(t('common.logout'), t('profile.logoutConfirmation'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.logout'), style: 'destructive', onPress: signOut },
+    ]);
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(t('profile.permissionDenied'), t('profile.permissionExplanation'));
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      setProfileImage(uri);
+      saveAvatarLocally(uri);
+    }
   };
 
   return (
@@ -54,18 +96,22 @@ export default function ProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image
-              source={{ uri: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' }}
+              source={{
+                uri:
+                  profileImage ||
+                  'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+              }}
               style={styles.avatar}
             />
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity style={styles.editButton} onPress={pickImage}>
               <Edit size={16} color={Colors.white} />
             </TouchableOpacity>
           </View>
+
           <View style={styles.nameRow}>
             <Text style={styles.userName}>{user?.first_name || 'User'}</Text>
             <Text style={styles.userName}>{' ' + (user?.last_name || '')}</Text>
           </View>
-
 
           <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
 
@@ -107,7 +153,7 @@ export default function ProfileScreen() {
             <Text style={styles.menuText}>{t('profile.accountSettings', 'Account Settings')}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => setLanguageSelectorVisible(true)}>
+          <TouchableOpacity onPress={() => setLanguageSelectorVisible(true)} style={styles.menuItem}>
             <Globe size={20} color={Colors.primary[600]} style={styles.menuIcon} />
             <Text style={styles.menuText}>{t('profile.language')}</Text>
             <Text style={styles.languageValue}>
@@ -115,24 +161,17 @@ export default function ProfileScreen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.menuItem, styles.logoutItem]}
-            onPress={handleSignOut}
-          >
+          <TouchableOpacity style={[styles.menuItem, styles.logoutItem]} onPress={handleSignOut}>
             <LogOut size={20} color={Colors.error[600]} style={styles.menuIcon} />
             <Text style={[styles.menuText, styles.logoutText]}>{t('profile.logout')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      <LanguageSelector
-        visible={languageSelectorVisible}
-        onClose={() => setLanguageSelectorVisible(false)}
-      />
+      <LanguageSelector visible={languageSelectorVisible} onClose={() => setLanguageSelectorVisible(false)} />
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -310,3 +349,5 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.md,
   },
 });
+
+
